@@ -1,4 +1,36 @@
-## README.md
+# Notes.md
+## Bước 1 : Chuẩn bị môi trường và cài đặt sẵn sàng :
+[X] Nodejs v25 (node -v)
+[X] Python 3.14
+[X] Git
+[X] uv 0.9.15 (uv --version)
+[X] Tạo sẵn thư mục dự án, khởi tạo .git và .gitignore
+[X] Tạo thư mục chung `napo` chứa knowleadge của team
+[X] Tạo repo public dùng chung github : https://github.com/SonNguyen177/napo
+[X] Add colabbrators vào repo github thuynt116@gmail.com , khanhtoan2511@gmail.com , kieulinh2741994@gmail.com
+[X] Mở sourcetree, thiết lập remote đến github, init master và push thử
+[x] Cài đặt bmad-method trên thư mục gốc `npx bmad-method install` hoặc dùng lệnh sau để cài module core và tích hợp Claude, Khi cài chọn ngôn ngữ agent sử dụng và document output và Vietnamese :
+`npx bmad-method install --directory /path/to/project --modules bmm --tools claude-code --yes`
+[X] Chạy `claude` hoặc `claude --dangerously-skip-permissions` trên thư mục gốc, kiểm tra đúng model reasoning Opus 4.6
+[X] Kiểm tra thử các agent của bmad đã có từ terminal (generate-project-context , quick-dev, qa-generate-e2e-test , review-edge-case-hunter , document-project)
+
+## Bước 2 : Khởi tạo context (đọc codebase)
+[ ] Copy project được cho vào thư mục gốc của dự án, nếu có sẵn thư mục .git thì xoá đi
+[ ] Chạy /init để claude tạo file CLAUDE.md, đọc codebase hiểu hệ thống
+[ ] Sử dụng `bmad-generate-project-context` để bmad phân tích hệ thống, sinh ra file `project-context`
+[ ] Thêm các rule ngoại cảnh như giới hạn cuộc thi hackathon trong 1h, thành viên 04 người và ưu tiên chính là tìm và fix bug, phát triển feature nhỏ
+
+## Bước 3: Sinh file document hệ thống
+[ ] Sử dụng lệnh `bmad-document-project` để tài liệu hoá dự án brownfield , dùng cho các bước tìm bug tiếp theo
+
+## Bước 4 : Kiểm tra và chạy thử
+
+## Bước 5: Phát triển tính năng mới
+- Bật chế độ planning mode : (shift + tab ) x2
+- Viết sẵn yêu cầu ra 1 file .md
+- Chạy flow `quick-dev` để chạy qua các bước từ analysist đến review
+
+//--------------------------------------
 - Setup từ 1 folder **.git**, chỉ có file *.gitignore* và file *README.md*
 - Mở thư mục trên VSCode cho dễ theo dõi file
 - Copy source code, ko có các file markdown vào thư mục setup sẵn git
