@@ -1,9 +1,13 @@
+.claude/
+_bmad/
+
 # Python
 __pycache__/
 *.py[cod]
 *.egg-info/
 .venv/
 .pytest_cache/
+wheels/
 
 # Node
 node_modules/
@@ -20,3 +24,6 @@ Thumbs.db
 # UV
 *.lock
 !uv.lock
+
+# Worktrees
+worktree/
