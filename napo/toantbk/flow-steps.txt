@@ -1,0 +1,28 @@
+Chuẩn bị:
+- Cài đặt môi trường
+- Chuẩn bị repo, branch mỗi người
+- Chuẩn bị file .gitignore@napo\toantbk
+- Tạo folder worktree
+- Tạo file run-claude.bat
+
+1. Nap context *3*
+/bmad-generate-project-context theo huong dan @napo\toantbk\step1-generate-project-context.md
+
+2. Document project *7*
+/bmad-document-project theo huong dan @napo\toantbk\step2-document-project.md
+
+3. Tao CLAUDE.md
+/init lấy context từ @_bmad-output/project-context.md và cac documents trong @_bmad-output
+
+4. Tim bugs
+/bmad-review-edge-case-hunter cho module @matching-engine\exchange\admin theo huong dan @napo\toantbk\step3-bug-report-schema.md
+/bmad-review-edge-case-hunter cho module @matching-engine\exchange\engine theo huong dan @napo\toantbk\step3-bug-report-schema.md
+/bmad-review-edge-case-hunter cho module @matching-engine\client theo huong dan @napo\toantbk\step3-bug-report-schema.md
+
+5. Fix bugs
+/bmad-quick-dev fix bug cho module @matching-engine\exchange\admin theo huong dan @napo\toantbk\step4-fix-bug.md
+/bmad-quick-dev fix bug cho module @matching-engine\exchange\engine theo huong dan @napo\toantbk\step4-fix-bug.md
+/bmad-quick-dev fix bug cho module @matching-engine\client theo huong dan @napo\toantbk\step4-fix-bug.md
+
+6. Merge code fix
+/bmad-quick-dev merge code theo huong dan @napo\toantbk\step5-merge-code-fix-bug.md cho bug id ... 
