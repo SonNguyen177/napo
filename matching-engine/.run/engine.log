@@ -1,0 +1,30 @@
+Using CPython 3.14.4
+Creating virtual environment at: .venv
+   Building engine @ file:///Users/long/Projects/napo/matching-engine/exchange/engine
+warning: `build_system.requires = ["uv-build>=0.9.15,<0.10.0"]` does not contain the current uv version 0.11.7
+      Built engine @ file:///Users/long/Projects/napo/matching-engine/exchange/engine
+Downloading pygments (1.2MiB)
+Downloading pydantic-core (1.9MiB)
+ Downloaded pygments
+ Downloaded pydantic-core
+Installed 25 packages in 28ms
+INFO:     Started server process [79333]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+Starting exchange engine...
+  Admin API:        http://0.0.0.0:8000
+  Client WebSocket: ws://0.0.0.0:8765
+  Admin WebSocket:  ws://0.0.0.0:8000/ws/admin
+INFO:     127.0.0.1:56906 - "GET / HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56906 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56909 - "GET / HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56918 - "WebSocket /ws/admin" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:56919 - "WebSocket /ws/admin" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:56930 - "OPTIONS /api/market/start HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56930 - "POST /api/market/start HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56930 - "OPTIONS /api/market/stop HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56930 - "POST /api/market/stop HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56930 - "POST /api/market/start HTTP/1.1" 200 OK
