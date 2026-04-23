@@ -27,3 +27,6 @@ Thumbs.db
 
 # Worktrees
 worktree/
+
+# Runtime logs
+matching-engine/.run/
