@@ -90,7 +90,7 @@ export default function useWebSocket() {
             break;
 
           case "trade":
-            setTrades((prev) => [msg, ...prev].slice(0, 200));
+            setTrades((prev) => [msg, ...prev].slice(0, 500));
             break;
 
           case "execution_report":

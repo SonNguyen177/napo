@@ -155,7 +155,11 @@ def create_app(
             from fastapi.responses import JSONResponse
             return JSONResponse(status_code=400, content={"detail": "No fields to update"})
 
-        updated = engine.update_stock_config(symbol.upper(), **updates)
+        try:
+            updated = engine.update_stock_config(symbol.upper(), **updates)
+        except ValueError as e:
+            from fastapi.responses import JSONResponse
+            return JSONResponse(status_code=400, content={"detail": str(e)})
         if updated is None:
             from fastapi.responses import JSONResponse
             return JSONResponse(status_code=404, content={"detail": f"Unknown symbol: {symbol}"})
