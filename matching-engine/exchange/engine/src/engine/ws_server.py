@@ -146,6 +146,19 @@ class ExchangeWSServer:
             self._log("OUT", client_id, "error", f"Invalid order: {e}")
             return
 
+        # Envelope validation at the WS boundary so malformed client input
+        # cannot reach the engine's os._exit fail-fast guard (ECH-ENGINE-002/003).
+        if quantity <= 0:
+            msg = f"Invalid order: quantity must be positive, got {quantity}"
+            await self._send_json(ws, {"type": "error", "message": msg})
+            self._log("OUT", client_id, "error", msg)
+            return
+        if price < 0:
+            msg = f"Invalid order: price must be non-negative, got {price}"
+            await self._send_json(ws, {"type": "error", "message": msg})
+            self._log("OUT", client_id, "error", msg)
+            return
+
         # Log the incoming order as FIX
         fix_raw = fix_to_human(encode_new_order_single(order))
         self._log("IN", client_id, "new_order",
