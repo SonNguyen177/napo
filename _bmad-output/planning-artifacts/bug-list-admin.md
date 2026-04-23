@@ -7,10 +7,11 @@ Source chính: `ECH` (Edge Case Hunter path tracing) — bổ sung các path r�
 
 ## ECH-ADMIN-001
 
-- [ ] Fixed
+- [x] Fixed
 - **Severity**: P0 Blocker
 - **Module**: `admin/StockConfig`
 - **Location**: `matching-engine/exchange/admin/src/components/StockConfig.jsx:26-34`
+- **Fix-summary**: Added pure helper `src/lib/validateStockConfig.js` enforcing `floor>0`, `ceiling>0`, `ceiling>floor`, `price_step>0`, `qty_step>0`. `StockRow.handleSave` now runs the guard first and shows a human-readable error inline instead of POSTing the bad payload — engine no longer self-destructs on `ceiling<=floor`. Coverage: `matching-engine/exchange/admin/test/unit/validateStockConfig.test.js` (6 cases) via `node --test`; added `npm test` script.
 - **Description**: Form Save stock config không validate mối quan hệ giữa các field (`ceiling > floor`, `price_step > 0`, `qty_step > 0`, `(ceiling-floor) % price_step == 0`). Chỉ `parseInt(...) || 0` ở onChange (line 45-47). User nhập `ceiling <= floor` (ví dụ floor=20000, ceiling=15000) rồi Save → gửi PUT `/api/stocks/{symbol}` với payload hợp lệ với `StockConfigUpdate` (chỉ kiểm `> 0`) → server accept và `book.config` bị cập nhật.
 - **Root cause**: Không có client-side invariant guard; không có server-side guard trong `update_stock_config`. Admin UI là điểm cuối cùng có thể chặn ceiling<=floor trước khi engine self-destruct.
 - **Impact**: Order kế tiếp rơi vào `MatchingEngine.submit_order` → envelope check `ceiling <= floor` → `os._exit(1)`. Engine chết, mất toàn bộ state RAM (books, trades, configs do Admin vừa sửa, comm logs). Demo vỡ, client UI mất WS, phải `./startall.sh` lại.
