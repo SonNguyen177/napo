@@ -14,6 +14,7 @@
 □ Order state machine: fill() và cancel() có guard terminal state không?
   FILLED → không được fill/cancel thêm
   CANCELLED → không được fill/cancel thêm
+□ Sửa khối lượng tăng lên hoặc sửa giá, lệnh phải bị mất ưu tiên thời gian (đẩy xuống cuối hàng của mức giá đó). Nếu giảm khối lượng thì lệnh được giữ nguyên ưu tiên thời gian.
 
 ── DANH MỤC 2: LOGIC ĐẶT LỆNH ─────────────
 □ Đã đặt thành công lệnh LIMIT và MARKET trong phiên OPEN ?
@@ -36,6 +37,20 @@
 □ Nếu hai lệnh cùng đẩy vào hệ thống từ cùng một session → đã reject lệnh thứ 2?
 
 ── DANH MỤC 3: LOGIC Admin ─────────────
+□ Cho phép Mở phiên, Đóng phiên thành công?
+□ Cho phép sửa mã cổ phiếu thành công? 
+□ Giá trần, Giá sàn, bước giá, bước khối lượng đã validate đủ các yêu cầu bên dưới chưa?
+    - Không được để trống, khoảng trắng
+    - không được nhập <= 0
+    - Không được nhập số quá lớn (VD: 9999999999999999999)
+    - Không được nhập chữ, ký tự đặc biệt
+    - Không được nhập khác số nguyên dương
+    - Giá trần - Giá sàn phải đủ lớn để chứa ít nhất 1 bước giá 
+□ Thông tin bên mua, bên bán của từng mã cổ phiếu được cập nhật chính xác khi có lệnh đẩy vào, không cần load lại trang
+□ Trade History cập nhật chính xác khi có lệnh đẩy vào, không cần load lại trang
+□ Communication Logs lưu đầy đủ các log hệ thống khi có thay đổi, không cần load lại trang
+
+── DANH MỤC 4: LOGIC **NEW FEATURE** ─────────────
 □ Cho phép Mở phiên, Đóng phiên thành công?
 □ Cho phép sửa mã cổ phiếu thành công? 
 □ Giá trần, Giá sàn, bước giá, bước khối lượng đã validate đủ các yêu cầu bên dưới chưa?
