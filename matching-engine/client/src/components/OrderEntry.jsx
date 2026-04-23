@@ -1,11 +1,11 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { validateOrderForm } from "../lib/validateOrderForm";
 
 const SYMBOLS = ["ACB", "FPT", "VCK"];
 const SIDES = ["BUY", "SELL"];
 const ORD_TYPES = ["LIMIT", "MARKET"];
-const ACCOUNT_RE = /^[A-Za-z0-9_-]+$/;
 
-export default function OrderEntry({ sendOrder, execReports, snapshots, marketState }) {
+export default function OrderEntry({ sendOrder, execReports, snapshots }) {
   const [form, setForm] = useState({
     account: "",
     symbol: "FPT",
@@ -14,60 +14,24 @@ export default function OrderEntry({ sendOrder, execReports, snapshots, marketSt
     price: "",
     quantity: "",
   });
-  const [formError, setFormError] = useState("");
 
   const [autoGen, setAutoGen] = useState(false);
   const [autoInterval, setAutoInterval] = useState(1000);
   const autoRef = useRef(null);
   const orderCounter = useRef(0);
 
-  const isClosed = marketState !== "OPEN";
-
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const validate = () => {
-    const account = form.account.trim();
-    if (!account) return "Account không được để trống/khoảng trắng";
-    if (!ACCOUNT_RE.test(account)) return "Account chỉ chứa chữ, số, '_' hoặc '-'";
-
-    const snap = snapshots[form.symbol];
-    const qty = Number(form.quantity);
-    if (!Number.isInteger(qty) || qty <= 0) return "Quantity phải là số nguyên dương";
-    if (snap && qty % snap.qty_step !== 0) return `Quantity phải là bội của ${snap.qty_step}`;
-
-    if (form.ord_type === "LIMIT") {
-      const price = Number(form.price);
-      if (!Number.isInteger(price) || price <= 0) return "Price phải là số nguyên dương";
-      if (snap) {
-        if (price < snap.floor) return `Price < floor (${snap.floor})`;
-        if (price > snap.ceiling) return `Price > ceiling (${snap.ceiling})`;
-        if ((price - snap.floor) % snap.price_step !== 0)
-          return `Price phải là bội của ${snap.price_step} từ floor`;
-      }
-    }
-    return "";
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (isClosed) {
-      setFormError("Phiên đã đóng (CLOSED) — không thể đặt lệnh");
-      return;
-    }
-    const err = validate();
-    if (err) {
-      setFormError(err);
-      return;
-    }
-    setFormError("");
+    if (!validateOrderForm(form)) return;
 
     orderCounter.current += 1;
-    const account = form.account.trim();
     sendOrder({
-      cl_ord_id: `${account}-${Date.now()}-${orderCounter.current}`,
-      account,
+      cl_ord_id: `${form.account}-${Date.now()}-${orderCounter.current}`,
+      account: form.account,
       symbol: form.symbol,
       side: form.side,
       ord_type: form.ord_type,
@@ -104,13 +68,13 @@ export default function OrderEntry({ sendOrder, execReports, snapshots, marketSt
   }, [sendOrder, snapshots]);
 
   useEffect(() => {
-    if (autoGen && !isClosed) {
+    if (autoGen) {
       autoRef.current = setInterval(generateRandomOrder, autoInterval);
     } else {
       clearInterval(autoRef.current);
     }
     return () => clearInterval(autoRef.current);
-  }, [autoGen, autoInterval, generateRandomOrder, isClosed]);
+  }, [autoGen, autoInterval, generateRandomOrder]);
 
   const recentReports = execReports.slice(0, 8);
 
@@ -177,15 +141,7 @@ export default function OrderEntry({ sendOrder, execReports, snapshots, marketSt
             placeholder="e.g. 100"
           />
         </div>
-        {formError && <div className="error-text" style={{ color: "#c00" }}>{formError}</div>}
-        {isClosed && (
-          <div className="error-text" style={{ color: "#c60" }}>
-            Phiên đang CLOSED — không thể đặt lệnh
-          </div>
-        )}
-        <button type="submit" className="btn btn-primary" disabled={isClosed}>
-          Place Order
-        </button>
+        <button type="submit" className="btn btn-primary">Place Order</button>
       </form>
 
       <div className="auto-gen">
@@ -202,7 +158,6 @@ export default function OrderEntry({ sendOrder, execReports, snapshots, marketSt
         <button
           className={`btn ${autoGen ? "btn-danger" : "btn-success"}`}
           onClick={() => setAutoGen(!autoGen)}
-          disabled={isClosed}
         >
           {autoGen ? "Stop Auto" : "Start Auto"}
         </button>

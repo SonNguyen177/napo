@@ -1,5 +1,7 @@
+import { useState } from "react";
 import useAdminApi from "./hooks/useAdminApi";
 import useAdminWebSocket from "./hooks/useAdminWebSocket";
+import { runMarketAction } from "./lib/marketControlActions";
 import MarketControl from "./components/MarketControl";
 import StockConfig from "./components/StockConfig";
 import OrderBookView from "./components/OrderBookView";
@@ -11,13 +13,16 @@ import "./App.css";
 function App() {
   const { connected, state } = useAdminWebSocket();
   const api = useAdminApi();
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleStart = async () => {
-    await api.startMarket();
+    const result = await runMarketAction(() => api.startMarket());
+    setErrorMsg(result.ok ? "" : result.error);
   };
 
   const handleStop = async () => {
-    await api.stopMarket();
+    const result = await runMarketAction(() => api.stopMarket());
+    setErrorMsg(result.ok ? "" : result.error);
   };
 
   const handleSaveStock = async (symbol, data) => {
@@ -34,6 +39,12 @@ function App() {
       </header>
 
       <div className="admin-layout">
+        {errorMsg && (
+          <div className="error-text" role="alert">
+            {errorMsg}
+          </div>
+        )}
+
         <div className="top-row">
           <MarketControl
             marketState={state?.market_state}

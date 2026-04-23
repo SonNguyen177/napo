@@ -31,9 +31,9 @@ function App() {
           />
         </aside>
         <main className="right-panel">
-          <MarketData orderBooks={orderBooks} snapshots={snapshots} />
-          <TradeView trades={trades} />
+          <MarketData orderBooks={orderBooks} snapshots={snapshots} trades={trades} />
           <PriceChart trades={trades} />
+          <TradeView trades={trades} />
         </main>
       </div>
     </div>

@@ -161,11 +161,9 @@ class OrderBook:
 
             queue = opposite[best_price]
             while incoming.leaves_qty > 0 and queue:
-                # FIFO: oldest resting order (appended first) is at queue[0].
                 resting = queue[0]
                 fill_qty = min(incoming.leaves_qty, resting.leaves_qty)
-                # Trade price = maker (resting) price, not taker's limit price.
-                fill_price = best_price
+                fill_price = incoming.price if incoming.price else best_price
 
                 # Apply fills
                 incoming.fill(fill_qty, fill_price)
@@ -196,7 +194,7 @@ class OrderBook:
                     last_px=fill_price, last_qty=fill_qty,
                 ))
 
-                # Remove fully filled resting order from the front (FIFO).
+                # Remove fully filled resting order (FIFO: pop from the left)
                 if resting.leaves_qty == 0:
                     queue.popleft()
 

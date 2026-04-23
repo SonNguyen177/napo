@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-import re
 import time
 from collections import deque
 from dataclasses import dataclass, field
@@ -20,23 +19,6 @@ from engine.fix_codec import (
 )
 from engine.matching import MatchingEngine
 from engine.models import ExecType, OrdType, Order, Side
-
-
-# Account: non-empty, trimmed; alphanumeric/underscore/dash only.
-_ACCOUNT_RE = re.compile(r"^[A-Za-z0-9_-]+$")
-
-
-def _coerce_int(name: str, raw: object) -> int:
-    """Coerce a JSON value to int, rejecting floats (incl. 100.5) and bools."""
-    if isinstance(raw, bool):
-        raise ValueError(f"{name} must be an integer (got bool)")
-    if isinstance(raw, float):
-        # Silent truncation of 100.5 → 100 violates "chỉ cho nhập số nguyên".
-        raise ValueError(f"{name} must be an integer (got float {raw})")
-    if isinstance(raw, int):
-        return raw
-    # Strings/other — let int() raise ValueError for non-numeric.
-    return int(raw)
 
 
 @dataclass
@@ -110,11 +92,6 @@ class ExchangeWSServer:
         msg = json.dumps(data)
         websockets.broadcast(list(self._clients.keys()), msg)
 
-    async def broadcast_market_state(self, state: str) -> None:
-        """Notify all clients that the market state changed (OPEN/CLOSED)."""
-        await self._broadcast_json_all({"type": "market_state", "state": state})
-        self._log("OUT", "ALL", "market_state", f"state={state}")
-
     def _build_market_snapshot(self) -> list[dict]:
         """Build snapshot data for all stocks."""
         snapshots = []
@@ -144,51 +121,24 @@ class ExchangeWSServer:
             })
         return snapshots
 
-    async def _handle_new_order(
-        self,
-        ws: ServerConnection,
-        client_id: str,
-        data: dict,
-        seen_cl_ord_ids: set[str],
-    ) -> None:
+    async def _handle_new_order(self, ws: ServerConnection, client_id: str, data: dict) -> None:
         """Handle an incoming new_order message."""
         try:
-            cl_ord_id = data["cl_ord_id"]
-            if not isinstance(cl_ord_id, str) or not cl_ord_id.strip():
-                raise ValueError("cl_ord_id must be a non-empty string")
-            if cl_ord_id in seen_cl_ord_ids:
-                raise ValueError(f"duplicate cl_ord_id in session: {cl_ord_id}")
-
-            account_raw = data.get("account", "")
-            account = account_raw.strip() if isinstance(account_raw, str) else ""
-            if not account:
-                raise ValueError("account must not be empty/whitespace")
-            if not _ACCOUNT_RE.fullmatch(account):
-                raise ValueError(
-                    "account must contain only letters, digits, underscore or dash"
-                )
-
             side = Side(data["side"].upper())
             ord_type = OrdType(data.get("ord_type", "LIMIT").upper())
-            price = _coerce_int("price", data.get("price", 0))
-            quantity = _coerce_int("quantity", data["quantity"])
-
-            # Envelope validation: reject before the engine's fail-fast guard can fire.
-            if price < 0:
-                raise ValueError(f"price must be >= 0 (got {price})")
-            if quantity <= 0:
-                raise ValueError(f"quantity must be > 0 (got {quantity})")
+            price = int(data.get("price", 0))
+            quantity = int(data["quantity"])
 
             order = Order(
-                cl_ord_id=cl_ord_id,
-                account=account,
+                cl_ord_id=data["cl_ord_id"],
+                account=data.get("account", ""),
                 symbol=data["symbol"].upper(),
                 side=side,
                 ord_type=ord_type,
                 price=price,
                 quantity=quantity,
             )
-        except (KeyError, ValueError, AttributeError) as e:
+        except (KeyError, ValueError) as e:
             await self._send_json(ws, {
                 "type": "error",
                 "message": f"Invalid order: {e}",
@@ -196,7 +146,18 @@ class ExchangeWSServer:
             self._log("OUT", client_id, "error", f"Invalid order: {e}")
             return
 
-        seen_cl_ord_ids.add(cl_ord_id)
+        # Envelope validation at the WS boundary so malformed client input
+        # cannot reach the engine's os._exit fail-fast guard (ECH-ENGINE-002/003).
+        if quantity <= 0:
+            msg = f"Invalid order: quantity must be positive, got {quantity}"
+            await self._send_json(ws, {"type": "error", "message": msg})
+            self._log("OUT", client_id, "error", msg)
+            return
+        if price < 0:
+            msg = f"Invalid order: price must be non-negative, got {price}"
+            await self._send_json(ws, {"type": "error", "message": msg})
+            self._log("OUT", client_id, "error", msg)
+            return
 
         # Log the incoming order as FIX
         fix_raw = fix_to_human(encode_new_order_single(order))
@@ -272,8 +233,6 @@ class ExchangeWSServer:
         """Handle a single client connection lifecycle."""
         client_id = self._next_client_id()
         self._clients[ws] = client_id
-        # Dedup cl_ord_ids per connection to reject double-submit from same session.
-        seen_cl_ord_ids: set[str] = set()
         self._log("IN", client_id, "connect", "Client connected")
 
         try:
@@ -295,7 +254,7 @@ class ExchangeWSServer:
 
                 msg_type = data.get("type", "")
                 if msg_type == "new_order":
-                    await self._handle_new_order(ws, client_id, data, seen_cl_ord_ids)
+                    await self._handle_new_order(ws, client_id, data)
                 elif msg_type == "subscribe":
                     # Re-send snapshot
                     for snapshot in self._build_market_snapshot():
