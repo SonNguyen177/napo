@@ -115,10 +115,11 @@ onClick={() => setExpanded(expanded === i ? null : i)}
 
 ## ECH-ADMIN-004
 
-- [ ] Fixed
+- [x] Fixed
 - **Severity**: P1 Critical
 - **Module**: `admin/App`
 - **Location**: `matching-engine/exchange/admin/src/App.jsx:15-25`
+- **Fix-summary**: Added pure helper `src/lib/marketControlActions.js` exporting `runMarketAction(action)` — it awaits the callback and returns `{ ok, error }` instead of rejecting. `App.jsx` now keeps an `errorMsg` state (`useState("")`), routes `handleStart`/`handleStop` through `runMarketAction`, sets the message on failure (clears it on success), and renders it in an `.error-text` banner with `role="alert"`. Silent 400s like "Market is already closed" are now visible; no more unhandled promise rejections. Coverage: `matching-engine/exchange/admin/test/unit/marketControlActions.test.js` (7 cases: helper success/failure/non-Error/invalid-input + App.jsx source integration checks) via `node --test`.
 - **Description**: `handleStart`, `handleStop` `await api.startMarket()` / `api.stopMarket()` không bọc try/catch. Nếu API trả non-2xx (ví dụ market đã OPEN → `POST /api/market/start` trả 400 từ `api.py`), `useAdminApi.api` throw `new Error(data.detail || "HTTP 400")`. Error bubble thành unhandled promise rejection, không UI feedback. User bấm nút không thấy gì thay đổi (vì polling WS sẽ tự cập nhật khi thành công, nhưng khi thất bại không có tín hiệu).
 - **Root cause**: Thiếu error handling ở các entry nhưng `handleSaveStock` cũng bị — tuy nhiên `handleSaveStock` delegate xuống `StockRow` đã có try/catch ở line 26-34 nên ok; `handleStart`/`handleStop` không có downstream catch.
 - **Impact**: Silent failure cho thao tác thay đổi market state. User không biết vì sao nút bấm vô tác dụng; phải nhìn Network tab.
