@@ -146,10 +146,11 @@ const handleStop = async () => {
 
 ## ECH-ADMIN-005
 
-- [ ] Fixed
+- [x] Fixed
 - **Severity**: P1 Critical
 - **Module**: `admin/OrderBookView`
 - **Location**: `matching-engine/exchange/admin/src/components/OrderBookView.jsx:1,44-54`
+- **Fix-summary**: Removed hardcoded `SYMBOLS = ["ACB","FPT","VCK"]`. Added pure helper `src/lib/getBookSymbols.js` that unions `Object.keys(books)` with `Object.keys(stocks)` and returns a sorted, deduped list. `OrderBookView.jsx` now calls `getBookSymbols(books, stocks)` and renders a `No stocks configured` empty state when the list is empty; `App.jsx` passes `stocks={state?.stocks}` so the fallback works before any order has been placed. Coverage: `matching-engine/exchange/admin/test/unit/getBookSymbols.test.js` (9 cases: missing/empty inputs, books-only, stocks-only fallback, books∪stocks union, sort stability, dedup, plus source-level assertions that the hardcoded array is gone and the helper is wired into OrderBookView) via `node --test`.
 - **Description**: `SYMBOLS = ["ACB", "FPT", "VCK"]` hardcode. Nếu `DEFAULT_STOCKS` thay đổi (hoặc ai đó bổ sung stock vào `ExchangeConfig.stocks` qua code), OrderBookView không hiển thị book mới — dù `StockConfig` (line 72) render dynamic từ `state?.stocks`. Nếu server thay symbol (rename ACB → ACV), panel sẽ hiển thị "Empty book" cho symbol cũ.
 - **Root cause**: Duplicate source of truth — component giữ list tĩnh thay vì đọc `Object.keys(books ?? {})` hoặc `Object.keys(stocks ?? {})`.
 - **Impact**: Trader / ops không thấy order book của stock đang live; giao dịch vẫn chạy nhưng Admin mù. Inconsistency giữa `StockConfig` (dynamic) và `OrderBookView` (static) gây hiểu nhầm.

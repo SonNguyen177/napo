@@ -1,4 +1,4 @@
-const SYMBOLS = ["ACB", "FPT", "VCK"];
+import { getBookSymbols } from "../lib/getBookSymbols.js";
 
 function BookCard({ symbol, book }) {
   const bids = book?.bids || [];
@@ -41,15 +41,20 @@ function BookCard({ symbol, book }) {
   );
 }
 
-export default function OrderBookView({ books }) {
+export default function OrderBookView({ books, stocks }) {
+  const symbols = getBookSymbols(books, stocks);
   return (
     <div className="card order-book-view">
       <h2>Order Books</h2>
-      <div className="books-grid">
-        {SYMBOLS.map((symbol) => (
-          <BookCard key={symbol} symbol={symbol} book={books?.[symbol]} />
-        ))}
-      </div>
+      {symbols.length === 0 ? (
+        <div className="empty">No stocks configured</div>
+      ) : (
+        <div className="books-grid">
+          {symbols.map((symbol) => (
+            <BookCard key={symbol} symbol={symbol} book={books?.[symbol]} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

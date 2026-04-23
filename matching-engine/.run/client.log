@@ -3,7 +3,39 @@
 > vite
 
 
-  VITE v8.0.3  ready in 188 ms
+  VITE v8.0.3  ready in 287 ms
 
   ➜  Local:   http://localhost:5173/
   ➜  Network: use --host to expose
+3:06:45 PM [vite] Internal server error: Failed to resolve import "lightweight-charts" from "src/components/PriceChart.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/linhktt/Documents/napo/matching-engine/client/src/components/PriceChart.jsx:9:7
+  1  |  import { useEffect, useRef, useState } from "react";
+  2  |  ...yle, CandlestickSeries, LineSeries, HistogramSeries } from "lightweight-charts";
+     |                                                                 ^
+  3  |  import useCandleData from "../hooks/useCandleData";
+  4  |  var _jsxFileName = "/Users/linhktt/Documents/napo/matching-engine/client/src/components/PriceChart.jsx";
+      at TransformPluginContext._formatLog (file:///Users/linhktt/Documents/napo/matching-engine/client/node_modules/vite/dist/node/chunks/node.js:30259:39)
+      at TransformPluginContext.error (file:///Users/linhktt/Documents/napo/matching-engine/client/node_modules/vite/dist/node/chunks/node.js:30256:14)
+      at normalizeUrl (file:///Users/linhktt/Documents/napo/matching-engine/client/node_modules/vite/dist/node/chunks/node.js:27544:18)
+      at async file:///Users/linhktt/Documents/napo/matching-engine/client/node_modules/vite/dist/node/chunks/node.js:27607:30
+      at async Promise.all (index 1)
+      at async TransformPluginContext.transform (file:///Users/linhktt/Documents/napo/matching-engine/client/node_modules/vite/dist/node/chunks/node.js:27575:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/linhktt/Documents/napo/matching-engine/client/node_modules/vite/dist/node/chunks/node.js:30048:14)
+      at async loadAndTransform (file:///Users/linhktt/Documents/napo/matching-engine/client/node_modules/vite/dist/node/chunks/node.js:24177:26)
+3:06:45 PM [vite] (client) Pre-transform error: Failed to resolve import "lightweight-charts" from "src/components/PriceChart.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/linhktt/Documents/napo/matching-engine/client/src/components/PriceChart.jsx:9:7
+  1  |  import { useEffect, useRef, useState } from "react";
+  2  |  ...yle, CandlestickSeries, LineSeries, HistogramSeries } from "lightweight-charts";
+     |                                                                 ^
+  3  |  import useCandleData from "../hooks/useCandleData";
+  4  |  var _jsxFileName = "/Users/linhktt/Documents/napo/matching-engine/client/src/components/PriceChart.jsx";
+3:06:45 PM [vite] (client) Pre-transform error: Failed to resolve import "lightweight-charts" from "src/components/PriceChart.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/linhktt/Documents/napo/matching-engine/client/src/components/PriceChart.jsx:9:7
+  1  |  import { useEffect, useRef, useState } from "react";
+  2  |  ...yle, CandlestickSeries, LineSeries, HistogramSeries } from "lightweight-charts";
+     |                                                                 ^
+  3  |  import useCandleData from "../hooks/useCandleData";
+  4  |  var _jsxFileName = "/Users/linhktt/Documents/napo/matching-engine/client/src/components/PriceChart.jsx";

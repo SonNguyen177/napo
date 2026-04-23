@@ -138,7 +138,7 @@ class ExchangeWSServer:
                 price=price,
                 quantity=quantity,
             )
-        except (KeyError, ValueError) as e:
+        except (KeyError, ValueError, TypeError, AttributeError) as e:
             await self._send_json(ws, {
                 "type": "error",
                 "message": f"Invalid order: {e}",
