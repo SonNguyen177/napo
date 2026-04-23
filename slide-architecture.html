@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NAPO Matching Engine — Kiến trúc tổng quan</title>
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --border: #30363d;
+  --accent: #58a6ff;
+  --accent2: #3fb950;
+  --accent3: #f78166;
+  --accent4: #d2a8ff;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --yellow: #e3b341;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  padding: 28px 20px 48px;
+}
+h1 {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.subtitle {
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+.svg-wrap {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto 36px;
+}
+.section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  max-width: 960px;
+  margin: 0 auto 12px;
+  border-bottom: 1px solid #21262d;
+  padding-bottom: 6px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  max-width: 960px;
+  margin: 0 auto 28px;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.card-title {
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 8px;
+}
+.num {
+  border-radius: 50%;
+  width: 18px; height: 18px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; flex-shrink: 0;
+}
+.card ul { list-style: none; }
+.card ul li {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 2px 0 2px 12px;
+  position: relative;
+  line-height: 1.55;
+}
+.card ul li::before { content: '›'; position: absolute; left: 0; color: var(--accent2); }
+.card ul li code {
+  background: #21262d;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 10px;
+  color: var(--yellow);
+}
+.flow-wrap {
+  max-width: 960px;
+  margin: 0 auto 28px;
+  background: var(--surface);
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.8;
+  white-space: pre;
+  overflow-x: auto;
+}
+.invariant {
+  max-width: 960px;
+  margin: 0 auto;
+  background: #12110a;
+  border: 1px solid #3d3415;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+}
+</style>
+</head>
+<body>
+
+<h1>NAPO Matching Engine — Kiến trúc tổng quan</h1>
+<p class="subtitle">3 process · In-memory only · No DB · No queue · No cache — Hackathon demo</p>
+
+<!-- ═══════════════════════════════════════════════════════ SVG ══ -->
+<div class="svg-wrap">
+<svg viewBox="0 0 920 710" width="100%" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="ma" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#484f58"/></marker>
+  <marker id="mb" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#388bfd"/></marker>
+  <marker id="mg" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#3fb950"/></marker>
+  <marker id="mp" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#8957e5"/></marker>
+  <marker id="mt" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#39d0d8"/></marker>
+  <marker id="mo" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#d29922"/></marker>
+  <filter id="glow">
+    <feGaussianBlur stdDeviation="2.5" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+</defs>
+
+<!-- ── ROW 0 · USERS ─────────────────────────────────────────── -->
+<rect x="80"  y="14" width="230" height="68" rx="8" fill="#0d2544" stroke="#388bfd" stroke-width="1.5"/>
+<text x="195" y="38" text-anchor="middle" font-size="13" font-weight="700" fill="#79c0ff">👤 Nhà đầu tư / Trader</text>
+<text x="195" y="54" text-anchor="middle" font-size="10" fill="#8b949e">Retail Investor · Algo Bot</text>
+<text x="195" y="68" text-anchor="middle" font-size="10" fill="#8b949e">Browser / Trading System</text>
+
+<rect x="610" y="14" width="230" height="68" rx="8" fill="#1a0e2b" stroke="#8957e5" stroke-width="1.5"/>
+<text x="725" y="38" text-anchor="middle" font-size="13" font-weight="700" fill="#bc8cff">🛡 Quản trị viên</text>
+<text x="725" y="54" text-anchor="middle" font-size="10" fill="#8b949e">Admin / Operator</text>
+<text x="725" y="68" text-anchor="middle" font-size="10" fill="#8b949e">Market Control · Configuration</text>
+
+<line x1="195" y1="82" x2="195" y2="108" stroke="#388bfd" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#mb)"/>
+<line x1="725" y1="82" x2="725" y2="108" stroke="#8957e5" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#mp)"/>
+
+<!-- ── ROW 1 · UIs ────────────────────────────────────────────── -->
+<rect x="50"  y="110" width="290" height="92" rx="8" fill="#0d2544" stroke="#388bfd" stroke-width="1.5"/>
+<text x="195" y="133" text-anchor="middle" font-size="12" font-weight="700" fill="#79c0ff">Client UI  :5173</text>
+<text x="195" y="150" text-anchor="middle" font-size="10" fill="#8b949e">React 19 + Vite + recharts</text>
+<text x="195" y="166" text-anchor="middle" font-size="10" fill="#8b949e">OrderEntry · MarketData · TradeView · PriceChart</text>
+<text x="195" y="182" text-anchor="middle" font-size="10" fill="#8b949e">useWebSocket — auto-reconnect 2s</text>
+<text x="195" y="198" text-anchor="middle" font-size="9" fill="#388bfd">1 WS duy nhất tới :8765 · Không dùng REST</text>
+
+<rect x="580" y="110" width="290" height="92" rx="8" fill="#1a0e2b" stroke="#8957e5" stroke-width="1.5"/>
+<text x="725" y="133" text-anchor="middle" font-size="12" font-weight="700" fill="#bc8cff">Admin UI  :3001</text>
+<text x="725" y="150" text-anchor="middle" font-size="10" fill="#8b949e">React 19 + Vite · plain hooks</text>
+<text x="725" y="166" text-anchor="middle" font-size="10" fill="#8b949e">MarketControl · StockConfig · OrderBookView</text>
+<text x="725" y="182" text-anchor="middle" font-size="10" fill="#8b949e">TradeHistory · CommLogs · ClientCount</text>
+<text x="725" y="198" text-anchor="middle" font-size="9" fill="#8957e5">useAdminApi (REST) + useAdminWebSocket (WS)</text>
+
+<!-- ── ENGINE OUTER BOX ───────────────────────────────────────── -->
+<rect x="20" y="220" width="880" height="462" rx="10" fill="none" stroke="#3fb950" stroke-width="1.8" stroke-dasharray="6,3"/>
+<text x="460" y="238" text-anchor="middle" font-size="11" font-weight="700" fill="#3fb950" letter-spacing="0.5">⚡  ENGINE PROCESS  —  Port 8000 (HTTP + /ws/admin)  ·  Port 8765 (Client WS)  —  All state in RAM</text>
+
+<!-- ── ENGINE ROW A: modules ─────────────────────────────────── -->
+
+<!-- ws_server.py -->
+<rect x="38"  y="246" width="238" height="90" rx="8" fill="#0b2429" stroke="#39d0d8" stroke-width="1.5"/>
+<text x="157" y="267" text-anchor="middle" font-size="12" font-weight="700" fill="#56d4db">ws_server.py</text>
+<text x="157" y="283" text-anchor="middle" font-size="10" fill="#8b949e">ExchangeWSServer · Port :8765</text>
+<text x="157" y="298" text-anchor="middle" font-size="9" fill="#8b949e">IN: new_order · subscribe</text>
+<text x="157" y="312" text-anchor="middle" font-size="9" fill="#3fb950">OUT: execution_report (unicast → submitter)</text>
+<text x="157" y="326" text-anchor="middle" font-size="9" fill="#3fb950">OUT: trade · market_update (broadcast all)</text>
+
+<!-- matching.py -->
+<rect x="300" y="248" width="320" height="86" rx="8" fill="#1e1a08" stroke="#d29922" stroke-width="1.5"/>
+<text x="460" y="269" text-anchor="middle" font-size="12" font-weight="700" fill="#e3b341">matching.py  —  MatchingEngine</text>
+<text x="460" y="285" text-anchor="middle" font-size="10" fill="#8b949e">Singleton · shared by REST + WS via main.py</text>
+<text x="460" y="300" text-anchor="middle" font-size="9" fill="#d29922">check is_open() · symbol.upper() · route → OrderBook[symbol]</text>
+<text x="460" y="315" text-anchor="middle" font-size="9" fill="#8b949e">_trades: list[Trade]  ·  _books: dict[str, OrderBook]</text>
+<text x="460" y="328" text-anchor="middle" font-size="9" fill="#e3b341">Nguồn sự thật duy nhất  ·  os._exit(1) on bad envelope</text>
+
+<!-- api.py -->
+<rect x="644" y="246" width="238" height="90" rx="8" fill="#0d2b14" stroke="#3fb950" stroke-width="1.5"/>
+<text x="763" y="267" text-anchor="middle" font-size="12" font-weight="700" fill="#56d364">api.py  (FastAPI)</text>
+<text x="763" y="283" text-anchor="middle" font-size="10" fill="#8b949e">REST /api/market · /api/stocks · /api/trades</text>
+<text x="763" y="298" text-anchor="middle" font-size="9" fill="#8b949e">/api/orderbook · /api/logs · /api/clients</text>
+<text x="763" y="312" text-anchor="middle" font-size="9" fill="#d29922">WS /ws/admin → push admin_state every 0.5s</text>
+<text x="763" y="326" text-anchor="middle" font-size="9" fill="#8b949e">Server→Admin only · No inbound from admin WS</text>
+
+<!-- ── ENGINE ROW B: OrderBooks + side info ───────────────────── -->
+
+<!-- ACB -->
+<rect x="38"  y="354" width="165" height="78" rx="8" fill="#2b1d0e" stroke="#d29922" stroke-width="1.5"/>
+<text x="120" y="374" text-anchor="middle" font-size="12" font-weight="700" fill="#e3b341">OrderBook[ACB]</text>
+<text x="120" y="390" text-anchor="middle" font-size="10" fill="#8b949e">dict[int_price, deque]</text>
+<text x="120" y="405" text-anchor="middle" font-size="9" fill="#8b949e">Bids · Asks</text>
+<text x="120" y="419" text-anchor="middle" font-size="9" fill="#d29922">Price-time priority · FIFO</text>
+<text x="120" y="428" text-anchor="middle" font-size="8" fill="#8b949e">validate · match · place</text>
+
+<!-- FPT -->
+<rect x="222" y="354" width="165" height="78" rx="8" fill="#2b1d0e" stroke="#d29922" stroke-width="1.5"/>
+<text x="304" y="374" text-anchor="middle" font-size="12" font-weight="700" fill="#e3b341">OrderBook[FPT]</text>
+<text x="304" y="390" text-anchor="middle" font-size="10" fill="#8b949e">dict[int_price, deque]</text>
+<text x="304" y="405" text-anchor="middle" font-size="9" fill="#8b949e">Bids · Asks</text>
+<text x="304" y="419" text-anchor="middle" font-size="9" fill="#d29922">Price-time priority · FIFO</text>
+<text x="304" y="428" text-anchor="middle" font-size="8" fill="#8b949e">validate · match · place</text>
+
+<!-- VCK (highlighted) -->
+<rect x="405" y="344" width="178" height="98" rx="8" fill="#0b2429" stroke="#39d0d8" stroke-width="2.5" filter="url(#glow)"/>
+<text x="494" y="366" text-anchor="middle" font-size="13" font-weight="700" fill="#56d4db">OrderBook[VCK]</text>
+<text x="494" y="383" text-anchor="middle" font-size="10" fill="#8b949e">dict[int_price, deque]</text>
+<text x="494" y="398" text-anchor="middle" font-size="9" fill="#8b949e">Bids · Asks</text>
+<text x="494" y="413" text-anchor="middle" font-size="9" fill="#d29922">Price-time priority · FIFO</text>
+<text x="494" y="428" text-anchor="middle" font-size="8" fill="#39d0d8">config ref từ ExchangeConfig</text>
+<text x="494" y="438" text-anchor="middle" font-size="8" fill="#8b949e">validate · match · place</text>
+
+<!-- fix_codec -->
+<rect x="612" y="354" width="250" height="36" rx="6" fill="#1a1208" stroke="#d29922" stroke-width="1"/>
+<text x="737" y="370" text-anchor="middle" font-size="10" fill="#e3b341">fix_codec.py  —  FIX 4.4 encode/decode</text>
+<text x="737" y="384" text-anchor="middle" font-size="9" fill="#8b949e">Wire là JSON · FIX chỉ dùng cho CommLog render</text>
+
+<!-- config + models -->
+<rect x="612" y="396" width="250" height="36" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<text x="737" y="412" text-anchor="middle" font-size="10" fill="#8b949e">config.py  ·  StockConfig · ExchangeConfig</text>
+<text x="737" y="426" text-anchor="middle" font-size="9" fill="#8b949e">models.py  ·  Order · Trade · ExecutionReport</text>
+
+<!-- ── ENGINE ROW C: Trade History + CommLog ──────────────────── -->
+
+<!-- Trade History -->
+<rect x="38"  y="460" width="558" height="56" rx="8" fill="#161b22" stroke="#484f58" stroke-width="1.5"/>
+<text x="317" y="479" text-anchor="middle" font-size="12" font-weight="700" fill="#e6edf3">Trade History  ·  _trades: list[Trade]</text>
+<text x="317" y="496" text-anchor="middle" font-size="10" fill="#8b949e">Lưu trong RAM · Đọc bởi REST /api/trades · WS snapshot · admin_state</text>
+<text x="317" y="510" text-anchor="middle" font-size="9" fill="#3fb950">MatchResult → ws_server → broadcast trade + market_update → tất cả client</text>
+
+<!-- CommLog -->
+<rect x="38"  y="524" width="558" height="44" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<text x="317" y="542" text-anchor="middle" font-size="10" fill="#8b949e">_comm_logs: deque(maxlen=1000)  ·  CommLog FIX IN/OUT</text>
+<text x="317" y="558" text-anchor="middle" font-size="9" fill="#8b949e">Hiển thị tại Admin CommLogs panel · Bounded để tránh memory leak trong demo dài</text>
+
+<!-- Legend -->
+<rect x="614" y="460" width="258" height="108" rx="6" fill="#161b22" stroke="#21262d" stroke-width="1"/>
+<text x="743" y="476" text-anchor="middle" font-size="10" font-weight="700" fill="#8b949e">Chú thích</text>
+<line x1="626" y1="490" x2="656" y2="490" stroke="#388bfd" stroke-width="2"   marker-end="url(#mb)"/>
+<text x="662" y="494" font-size="9" fill="#79c0ff">WS JSON (new_order)</text>
+<line x1="626" y1="506" x2="656" y2="506" stroke="#39d0d8" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#mt)"/>
+<text x="662" y="510" font-size="9" fill="#56d4db">WS push / broadcast</text>
+<line x1="626" y1="522" x2="656" y2="522" stroke="#8957e5" stroke-width="1.5" marker-end="url(#mp)"/>
+<text x="662" y="526" font-size="9" fill="#bc8cff">HTTP REST /api/*</text>
+<line x1="626" y1="538" x2="656" y2="538" stroke="#d29922" stroke-width="1.5" marker-end="url(#mo)"/>
+<text x="662" y="542" font-size="9" fill="#e3b341">submit_order() call</text>
+<line x1="626" y1="554" x2="656" y2="554" stroke="#3fb950" stroke-width="1.3" stroke-dasharray="3,3" marker-end="url(#mg)"/>
+<text x="662" y="558" font-size="9" fill="#3fb950">admin_state push 0.5s</text>
+
+<!-- ═══════════════════════ ARROWS ════════════════════════════════ -->
+
+<!-- 1. Client UI → ws_server (WS :8765) vertical solid blue -->
+<line x1="120" y1="202" x2="120" y2="244" stroke="#388bfd" stroke-width="2" marker-end="url(#mb)"/>
+<text x="44" y="220" font-size="9" fill="#79c0ff">WS :8765</text>
+<text x="44" y="232" font-size="9" fill="#79c0ff">new_order</text>
+
+<!-- 2. ws_server → Client UI (exec_report/broadcast) vertical dashed teal -->
+<line x1="148" y1="244" x2="148" y2="204" stroke="#39d0d8" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#mt)"/>
+<text x="154" y="228" font-size="8" fill="#56d4db">exec_report</text>
+<text x="154" y="240" font-size="8" fill="#56d4db">broadcast ←</text>
+
+<!-- 3. Admin UI → api.py (HTTP REST) vertical solid purple -->
+<line x1="710" y1="202" x2="710" y2="244" stroke="#8957e5" stroke-width="1.5" marker-end="url(#mp)"/>
+<text x="716" y="222" font-size="9" fill="#bc8cff">REST</text>
+<text x="716" y="234" font-size="9" fill="#bc8cff">/api/*</text>
+
+<!-- 4. api.py → Admin UI (WS push 0.5s) vertical dashed green -->
+<line x1="740" y1="244" x2="740" y2="204" stroke="#3fb950" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#mg)"/>
+<text x="747" y="222" font-size="9" fill="#3fb950">WS push</text>
+<text x="747" y="234" font-size="9" fill="#3fb950">0.5s ←</text>
+
+<!-- 5. ws_server → matching (submit_order) horizontal yellow -->
+<line x1="276" y1="291" x2="298" y2="291" stroke="#d29922" stroke-width="1.8" marker-end="url(#mo)"/>
+<text x="277" y="285" font-size="8" fill="#e3b341">submit_order()</text>
+
+<!-- 6. api.py ↔ matching (get_trades / config read) double arrow -->
+<line x1="642" y1="286" x2="621" y2="286" stroke="#3fb950" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#mg)"/>
+<text x="623" y="280" font-size="8" fill="#3fb950">get_trades()</text>
+<line x1="621" y1="297" x2="642" y2="297" stroke="#3fb950" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#mg)"/>
+<text x="623" y="309" font-size="8" fill="#3fb950">config reads</text>
+
+<!-- 7. matching → ACB -->
+<path d="M 366 334 Q 244 344 122 352" stroke="#d29922" stroke-width="1.3" fill="none" marker-end="url(#mo)"/>
+
+<!-- 8. matching → FPT -->
+<path d="M 420 334 Q 364 342 306 352" stroke="#d29922" stroke-width="1.3" fill="none" marker-end="url(#mo)"/>
+
+<!-- 9. matching → VCK (short vertical) -->
+<line x1="492" y1="334" x2="492" y2="342" stroke="#39d0d8" stroke-width="2" marker-end="url(#mt)"/>
+
+<!-- 10. ACB → Trade History -->
+<path d="M 120 432 Q 118 446 130 458" stroke="#484f58" stroke-width="1.2" stroke-dasharray="3,3" fill="none" marker-end="url(#ma)"/>
+
+<!-- 11. FPT → Trade History -->
+<path d="M 304 432 Q 302 446 290 458" stroke="#484f58" stroke-width="1.2" stroke-dasharray="3,3" fill="none" marker-end="url(#ma)"/>
+
+<!-- 12. VCK → Trade History -->
+<path d="M 492 442 Q 472 452 440 458" stroke="#39d0d8" stroke-width="1.5" stroke-dasharray="3,3" fill="none" marker-end="url(#mt)"/>
+
+<!-- ── Step circles ─────────────────────────────────────────────── -->
+<circle cx="68"  cy="128" r="9" fill="#1f6feb"/>
+<text x="68"  y="132" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">2</text>
+
+<circle cx="598" cy="128" r="9" fill="#8957e5"/>
+<text x="598" y="132" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">1</text>
+
+<circle cx="56"  cy="264" r="9" fill="#39d0d8"/>
+<text x="56"  y="268" text-anchor="middle" font-size="10" font-weight="700" fill="#000">3</text>
+
+<circle cx="662" cy="264" r="9" fill="#3fb950"/>
+<text x="662" y="268" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">4</text>
+
+<circle cx="318" cy="266" r="9" fill="#d29922"/>
+<text x="318" y="270" text-anchor="middle" font-size="10" font-weight="700" fill="#000">5</text>
+
+<circle cx="423" cy="362" r="9" fill="#39d0d8"/>
+<text x="423" y="366" text-anchor="middle" font-size="10" font-weight="700" fill="#000">6</text>
+
+<circle cx="56"  cy="478" r="9" fill="#484f58"/>
+<text x="56"  y="482" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">7</text>
+
+</svg>
+</div>
+
+<!-- ═══════════════════════════════════════ CARDS ════════════════ -->
+<p class="section-title">Vai trò từng component</p>
+<div class="grid">
+
+  <div class="card">
+    <div class="card-title">
+      <span class="num" style="background:#8957e5;color:#fff">1</span>
+      <span style="color:#bc8cff">Admin UI  :3001</span>
+    </div>
+    <ul>
+      <li>React 19 + Vite · không dùng state library ngoài</li>
+      <li><code>useAdminApi</code> — wrapper REST để ra lệnh</li>
+      <li><code>useAdminWebSocket</code> — nhận snapshot 0.5s</li>
+      <li>Panel: <code>MarketControl</code> · <code>StockConfig</code></li>
+      <li>Panel: <code>OrderBookView</code> · <code>TradeHistory</code></li>
+      <li>Panel: <code>CommLogs</code> · <code>ClientCount</code></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span class="num" style="background:#1f6feb;color:#fff">2</span>
+      <span style="color:#79c0ff">Client UI  :5173</span>
+    </div>
+    <ul>
+      <li>React 19 + Vite + recharts</li>
+      <li>1 WS duy nhất tới <code>:8765</code> — không REST</li>
+      <li>auto-reconnect 2s</li>
+      <li>Gửi: <code>new_order</code> (LIMIT/MARKET) · <code>subscribe</code></li>
+      <li>Nhận exec report riêng; trade + update broadcast</li>
+      <li>Cap: trades ≤ 200 · execReports ≤ 100</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span class="num" style="background:#39d0d8;color:#000">3</span>
+      <span style="color:#56d4db">ws_server.py</span>
+    </div>
+    <ul>
+      <li><code>ExchangeWSServer</code> · Port <code>:8765</code></li>
+      <li>Nhận JSON <code>new_order</code> / <code>subscribe</code></li>
+      <li><code>execution_report</code> → unicast tới client đặt lệnh</li>
+      <li><code>trade</code> + <code>market_update</code> → <code>_broadcast_json_all</code></li>
+      <li>On connect → gửi <code>market_snapshot</code> per symbol</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span class="num" style="background:#3fb950;color:#000">4</span>
+      <span style="color:#56d364">api.py  (FastAPI)</span>
+    </div>
+    <ul>
+      <li>REST <code>/api/market/start|stop|state</code></li>
+      <li>REST <code>/api/stocks</code> + PUT <code>/api/stocks/{symbol}</code></li>
+      <li>REST <code>/api/trades</code> · <code>/api/logs</code> · <code>/api/clients</code></li>
+      <li>WS <code>/ws/admin</code> push <code>admin_state</code> mỗi 0.5s</li>
+      <li>Server → Admin one-way (không đọc msg từ admin)</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span class="num" style="background:#d29922;color:#000">5</span>
+      <span style="color:#e3b341">matching.py</span>
+    </div>
+    <ul>
+      <li><code>MatchingEngine</code> singleton — 1 instance duy nhất</li>
+      <li>Kiểm tra <code>is_open()</code> trước mỗi lệnh</li>
+      <li>Route order tới đúng <code>OrderBook[symbol]</code></li>
+      <li><code>_trades</code>: nguồn sự thật lịch sử giao dịch</li>
+      <li>price &lt; 0 hoặc qty ≤ 0 → <code>os._exit(1)</code></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span class="num" style="background:#39d0d8;color:#000">6</span>
+      <span style="color:#56d4db">order_book.py</span>
+    </div>
+    <ul>
+      <li>1 instance per symbol (ACB / FPT / VCK)</li>
+      <li><code>validate_order()</code>: floor/ceiling/price_step/qty_step</li>
+      <li><code>process_order()</code>: price-time priority</li>
+      <li>Bids/Asks: <code>dict[int_price, deque[Order]]</code></li>
+      <li>Trả <code>MatchResult</code>(trades, exec_reports, updates)</li>
+      <li>Config là reference → admin edits tức thì</li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════ FLOW ════════════════ -->
+<p class="section-title">Luồng đặt lệnh (happy path)</p>
+<div class="flow-wrap"><span style="color:#79c0ff">Client UI</span>
+  │ <span style="color:#39d0d8">{type:"new_order", symbol:"ACB", side:"BUY", price:20100, qty:100}</span>
+  ▼
+<span style="color:#56d4db">ws_server.py</span>  (_handle_new_order)
+  │ symbol.upper() → submit_order(order)
+  ▼
+<span style="color:#e3b341">matching.py</span>  (MatchingEngine.submit_order)
+  │ check is_open() → route tới OrderBook["ACB"]
+  ▼
+<span style="color:#56d4db">order_book.py</span>  (validate_order → process_order)
+  │ fill nếu có lệnh đối ứng → MatchResult
+  ▼
+<span style="color:#56d4db">ws_server.py</span>  (xử lý kết quả)
+  ├─► <span style="color:#39d0d8">execution_report</span>  →  chỉ client đặt lệnh
+  ├─► <span style="color:#3fb950">trade</span>             →  broadcast tất cả client
+  └─► <span style="color:#3fb950">market_update</span>     →  broadcast tất cả client
+                               │
+                         <span style="color:#56d364">api.py</span>  (0.5s sau)
+                               │ snapshot admin_state
+                               ▼
+                          <span style="color:#bc8cff">Admin UI cập nhật</span></div>
+
+<!-- ═══════════════════════════════════════ INVARIANT ═══════════ -->
+<div class="invariant">
+  ⚠️&nbsp; Chỉ có <strong style="color:#e6edf3">1 process engine</strong> giữ toàn bộ state trong RAM.&nbsp;
+  Restart = mất hết.&nbsp; Không DB · Không queue · Không cache — thiết kế cố ý cho hackathon demo.
+</div>
+
+</body>
+</html>

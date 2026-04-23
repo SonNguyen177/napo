@@ -1,0 +1,152 @@
+
+<!-- ═══════════════════════════════════════════════════ -->
+  <!-- PART 4 COVER                                        -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-idx="11">
+    <div class="part-hero">
+      <div class="part-num">04</div>
+      <div class="part-content">
+        <div class="part-label">Phần 04</div>
+        <div class="part-title"><span style="color:var(--accent3)">Bug Analysis</span><br>&amp; Fix</div>
+        <div class="part-sub">Các bugs đã identify · Cách fix · Reasoning</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SLIDE 4.1 – BUGS IDENTIFIED                         -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-idx="12" style="padding:28px 36px">
+    <div class="slide-label">Phần 04 — Bug Analysis &amp; Fix</div>
+    <div class="slide-title" style="margin-bottom:14px">Bug <span class="red">Dashboard</span> — 60 phút tìm &amp; fix</div>
+
+    <!-- STATS BAR -->
+    <div style="display:flex;gap:12px;margin-bottom:14px;align-items:stretch">
+      <div style="display:flex;gap:10px">
+        <div style="background:rgba(248,81,73,0.12);border:1px solid rgba(248,81,73,0.35);border-radius:10px;padding:10px 20px;text-align:center;min-width:90px">
+          <div style="font-size:34px;font-weight:700;color:#f85149;line-height:1">15</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:3px">Bugs tìm ra</div>
+        </div>
+        <div style="background:rgba(100,110,130,0.12);border:1px solid rgba(100,110,130,0.35);border-radius:10px;padding:10px 20px;text-align:center;min-width:90px">
+          <div style="font-size:34px;font-weight:700;color:#8b949e;line-height:1">0</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:3px">Đã fix</div>
+        </div>
+        <div style="background:rgba(210,153,34,0.12);border:1px solid rgba(210,153,34,0.35);border-radius:10px;padding:10px 20px;text-align:center;min-width:90px">
+          <div style="font-size:34px;font-weight:700;color:#d2a634;line-height:1">15</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:3px">Pending</div>
+        </div>
+      </div>
+      <div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:7px;text-transform:uppercase;letter-spacing:.06em">By Component</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span style="background:rgba(63,185,80,0.15);border:1px solid rgba(63,185,80,0.3);border-radius:6px;padding:4px 12px;font-size:14px;color:#3fb950">Engine / E2E <strong>12</strong></span>
+          <span style="background:rgba(210,168,255,0.15);border:1px solid rgba(210,168,255,0.3);border-radius:6px;padding:4px 12px;font-size:14px;color:#d2a8ff">Admin UI <strong>1</strong></span>
+          <span style="background:rgba(88,166,255,0.15);border:1px solid rgba(88,166,255,0.3);border-radius:6px;padding:4px 12px;font-size:14px;color:#58a6ff">Client UI <strong>2</strong></span>
+        </div>
+      </div>
+      <div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:7px;text-transform:uppercase;letter-spacing:.06em">By Severity</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span style="background:rgba(248,81,73,0.2);border:1px solid rgba(248,81,73,0.4);border-radius:6px;padding:4px 12px;font-size:14px;color:#ff4444;font-weight:700">P0 Blocker <strong>3</strong></span>
+          <span style="background:rgba(248,81,73,0.12);border:1px solid rgba(248,81,73,0.3);border-radius:6px;padding:4px 12px;font-size:14px;color:#f85149">P1 Critical <strong>3</strong></span>
+          <span style="background:rgba(210,153,34,0.15);border:1px solid rgba(210,153,34,0.3);border-radius:6px;padding:4px 12px;font-size:14px;color:#d2a634">P2 High <strong>8</strong></span>
+          <span style="background:rgba(100,110,130,0.15);border:1px solid rgba(100,110,130,0.3);border-radius:6px;padding:4px 12px;font-size:14px;color:#8b949e">P3 Low <strong>1</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUG LIST — top 6 representative bugs -->
+    <div style="display:flex;flex-direction:column;gap:7px;flex:1">
+
+      <!-- E2E-003 -->
+      <div style="display:grid;grid-template-columns:1fr 500px;gap:8px">
+        <div style="background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.35);border-radius:8px;padding:9px 14px">
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;flex-wrap:wrap">
+            <span style="font-weight:700;color:#ff4444;font-size:14px">E2E-003</span>
+            <span style="background:rgba(255,68,68,0.2);border:1px solid rgba(255,68,68,0.4);border-radius:4px;padding:2px 8px;font-size:12px;color:#ff4444;font-weight:700">P0 BLOCKER</span>
+            <span style="background:rgba(63,185,80,0.15);border:1px solid rgba(63,185,80,0.3);border-radius:4px;padding:2px 8px;font-size:12px;color:#3fb950">Admin API</span>
+            <span style="font-size:12px;color:var(--muted)">api.py · update_stock</span>
+          </div>
+          <div style="font-size:14px;color:var(--text)"><code>PUT /api/stocks/{symbol}</code> chấp nhận <code>ceiling &lt;= floor</code> — lệnh kế tiếp trigger <code>os._exit(1)</code>, toàn sàn sập.</div>
+        </div>
+        <div style="background:rgba(210,153,34,0.08);border:1px solid rgba(210,153,34,0.2);border-radius:8px;padding:9px 12px">
+          <div style="font-size:12px;color:#d2a634;margin-bottom:4px;font-weight:600">⏳ PLAN</div>
+          <div class="mono" style="font-size:13px;line-height:1.5">if new_ceiling &lt;= new_floor:<br>&nbsp;&nbsp;raise HTTPException(400,<br>&nbsp;&nbsp;&nbsp;"ceiling must be > floor")</div>
+          <div style="font-size:16px;color:var(--muted);margin-top:4px">Validate sau merge, reject 400 trước khi lưu</div>
+        </div>
+      </div>
+
+      <!-- E2E-004 -->
+      <div style="display:grid;grid-template-columns:1fr 500px;gap:8px">
+        <div style="background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.35);border-radius:8px;padding:9px 14px">
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;flex-wrap:wrap">
+            <span style="font-weight:700;color:#ff4444;font-size:14px">E2E-004</span>
+            <span style="background:rgba(255,68,68,0.2);border:1px solid rgba(255,68,68,0.4);border-radius:4px;padding:2px 8px;font-size:12px;color:#ff4444;font-weight:700">P0 BLOCKER</span>
+            <span style="background:rgba(63,185,80,0.15);border:1px solid rgba(63,185,80,0.3);border-radius:4px;padding:2px 8px;font-size:12px;color:#3fb950">WS Server</span>
+            <span style="font-size:12px;color:var(--muted)">ws_server.py · _handle_new_order</span>
+          </div>
+          <div style="font-size:14px;color:var(--text)">Lệnh WS với <code>price &lt; 0</code> hoặc <code>quantity &lt;= 0</code> không bị chặn sớm — tới engine guard → <code>os._exit(1)</code>.</div>
+        </div>
+        <div style="background:rgba(210,153,34,0.08);border:1px solid rgba(210,153,34,0.2);border-radius:8px;padding:9px 12px">
+          <div style="font-size:12px;color:#d2a634;margin-bottom:4px;font-weight:600">⏳ PLAN</div>
+          <div class="mono" style="font-size:13px;line-height:1.5">if price &lt; 0 or qty &lt;= 0:<br>&nbsp;&nbsp;send execution_report(<br>&nbsp;&nbsp;&nbsp;&nbsp;REJECTED, "Invalid input")<br>&nbsp;&nbsp;return</div>
+          <div style="font-size:16px;color:var(--muted);margin-top:4px">Reject mềm tại WS layer, không để engine nhận</div>
+        </div>
+      </div>
+
+      <!-- E2E-005 -->
+      <div style="display:grid;grid-template-columns:1fr 500px;gap:8px">
+        <div style="background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.35);border-radius:8px;padding:9px 14px">
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;flex-wrap:wrap">
+            <span style="font-weight:700;color:#ff4444;font-size:14px">E2E-005</span>
+            <span style="background:rgba(255,68,68,0.2);border:1px solid rgba(255,68,68,0.4);border-radius:4px;padding:2px 8px;font-size:12px;color:#ff4444;font-weight:700">P0 BLOCKER</span>
+            <span style="background:rgba(63,185,80,0.15);border:1px solid rgba(63,185,80,0.3);border-radius:4px;padding:2px 8px;font-size:12px;color:#3fb950">Order Model</span>
+            <span style="font-size:12px;color:var(--muted)">models.py · Order.fill()</span>
+          </div>
+          <div style="font-size:14px;color:var(--text)"><code>fill()</code> trên Order đã FILLED/CANCELLED vẫn cộng <code>filled_qty</code> — phá invariant <code>leaves_qty &gt;= 0</code>.</div>
+        </div>
+        <div style="background:rgba(210,153,34,0.08);border:1px solid rgba(210,153,34,0.2);border-radius:8px;padding:9px 12px">
+          <div style="font-size:12px;color:#d2a634;margin-bottom:4px;font-weight:600">⏳ PLAN</div>
+          <div class="mono" style="font-size:13px;line-height:1.5">def fill(self, qty, price):<br><span style="color:#f85149">&nbsp;&nbsp;if self.status in TERMINAL:<br>&nbsp;&nbsp;&nbsp;&nbsp;raise ValueError(...)</span><br>&nbsp;&nbsp;...</div>
+          <div style="font-size:16px;color:var(--muted);margin-top:4px">Guard terminal state — 1 fix cho cả E2E-005 &amp; 007</div>
+        </div>
+      </div>
+
+      <!-- E2E-001 -->
+      <div style="display:grid;grid-template-columns:1fr 500px;gap:8px">
+        <div style="background:rgba(248,81,73,0.06);border:1px solid rgba(248,81,73,0.25);border-radius:8px;padding:9px 14px">
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;flex-wrap:wrap">
+            <span style="font-weight:700;color:#f85149;font-size:14px">E2E-001</span>
+            <span style="background:rgba(248,81,73,0.15);border:1px solid rgba(248,81,73,0.3);border-radius:4px;padding:2px 8px;font-size:12px;color:#f85149;font-weight:700">P1 CRITICAL</span>
+            <span style="background:rgba(63,185,80,0.15);border:1px solid rgba(63,185,80,0.3);border-radius:4px;padding:2px 8px;font-size:12px;color:#3fb950">OrderBook</span>
+            <span style="font-size:12px;color:var(--muted)">order_book.py:166</span>
+          </div>
+          <div style="font-size:14px;color:var(--text)">Trade price dùng giá taker thay vì maker — vi phạm quy tắc "fill price = resting order's price".</div>
+        </div>
+        <div style="background:rgba(210,153,34,0.08);border:1px solid rgba(210,153,34,0.2);border-radius:8px;padding:9px 12px">
+          <div style="font-size:12px;color:#d2a634;margin-bottom:4px;font-weight:600">⏳ PLAN</div>
+          <div class="mono" style="font-size:13px;line-height:1.5"><span style="color:#f85149">- fill_price = incoming.price<br>&nbsp;&nbsp;if incoming.price else best_price</span><br><span style="color:#3fb950">+ fill_price = best_price</span></div>
+          <div style="font-size:16px;color:var(--muted);margin-top:4px">Luôn dùng giá maker (resting order)</div>
+        </div>
+      </div>
+
+      <!-- E2E-002 -->
+      <div style="display:grid;grid-template-columns:1fr 500px;gap:8px">
+        <div style="background:rgba(248,81,73,0.06);border:1px solid rgba(248,81,73,0.25);border-radius:8px;padding:9px 14px">
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;flex-wrap:wrap">
+            <span style="font-weight:700;color:#f85149;font-size:14px">E2E-002</span>
+            <span style="background:rgba(248,81,73,0.15);border:1px solid rgba(248,81,73,0.3);border-radius:4px;padding:2px 8px;font-size:12px;color:#f85149;font-weight:700">P1 CRITICAL</span>
+            <span style="background:rgba(63,185,80,0.15);border:1px solid rgba(63,185,80,0.3);border-radius:4px;padding:2px 8px;font-size:12px;color:#3fb950">OrderBook</span>
+            <span style="font-size:12px;color:var(--muted)">order_book.py:164,199</span>
+          </div>
+          <div style="font-size:14px;color:var(--text)">Time priority bị ngược: LIFO thay vì FIFO — lệnh đặt sau được khớp trước cùng price level.</div>
+        </div>
+        <div style="background:rgba(210,153,34,0.08);border:1px solid rgba(210,153,34,0.2);border-radius:8px;padding:9px 12px">
+          <div style="font-size:12px;color:#d2a634;margin-bottom:4px;font-weight:600">⏳ PLAN</div>
+          <div class="mono" style="font-size:13px;line-height:1.5"><span style="color:#f85149">- resting = queue[-1]<br>- queue.pop()</span><br><span style="color:#3fb950">+ resting = queue[0]<br>+ queue.popleft()</span></div>
+          <div style="font-size:16px;color:var(--muted);margin-top:4px">Duyệt từ đầu deque — đảm bảo FIFO</div>
+        </div>
+      </div>
+
+    </div>
+  </div>

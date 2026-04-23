@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lite Matching Engine — AI Hackathon</title>
+<style>
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #0d1117;
+  color: #e6edf3;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  padding: 28px 20px 48px;
+}
+h1 {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: #58a6ff;
+  margin-bottom: 4px;
+}
+.subtitle {
+  text-align: center;
+  font-size: 12px;
+  color: #8b949e;
+  margin-bottom: 28px;
+}
+.svg-wrap {
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto 36px;
+}
+.section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #58a6ff;
+  max-width: 920px;
+  margin: 0 auto 12px;
+  border-bottom: 1px solid #21262d;
+  padding-bottom: 6px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  max-width: 920px;
+  margin: 0 auto 28px;
+}
+.card {
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  padding: 11px 13px;
+}
+.card-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #58a6ff;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 7px;
+}
+.num {
+  background: #1f6feb;
+  color: #fff;
+  border-radius: 50%;
+  width: 18px; height: 18px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; flex-shrink: 0;
+}
+.card ul { list-style: none; }
+.card ul li {
+  font-size: 11px; color: #8b949e;
+  padding: 2px 0 2px 11px; position: relative;
+}
+.card ul li::before { content:'›'; position:absolute; left:0; color:#3fb950; }
+.card ul li code {
+  background:#21262d; padding:1px 4px; border-radius:3px;
+  font-family:monospace; font-size:10px; color:#e3b341;
+}
+.ep-wrap { max-width: 920px; margin: 0 auto 28px; }
+
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --yellow: #e3b341;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* ── DECK ── */
+  #deck {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    padding: 48px 64px;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+  .slide.active {
+    display: flex;
+    opacity: 1;
+  }
+
+  /* ── SLIDE HEADER ── */
+  .slide-label {
+    font-size: 16px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .slide-title {
+    font-size: 38px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 32px;
+  }
+  .slide-title .accent { color: var(--accent); }
+  .slide-title .green  { color: var(--accent2); }
+  .slide-title .red    { color: var(--accent3); }
+  .slide-title .purple { color: var(--accent4); }
+  .slide-title .yellow { color: var(--yellow); }
+
+  /* ── NAV ── */
+  #nav {
+    position: fixed;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 32px;
+    padding: 10px 20px;
+    z-index: 100;
+  }
+  #nav button {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 6px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+  }
+  #nav button:hover { background: var(--border); }
+  #nav button:disabled { opacity: 0.3; cursor: default; }
+  #counter { font-size: 13px; color: var(--muted); min-width: 56px; text-align: center; }
+
+  /* ── PROGRESS BAR ── */
+  #progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: var(--accent);
+    transition: width 0.35s ease;
+    z-index: 200;
+  }
+</style>
+</head>
+<body>
+
+<h1>Lite Matching Engine — System Architecture</h1>
+
+		<div class="svg-wrap">
+<svg viewBox="0 0 920 700" width="100%" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="a"  markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#484f58"/></marker>
+  <marker id="ab" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#388bfd"/></marker>
+  <marker id="ag" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#3fb950"/></marker>
+  <marker id="ap" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#8957e5"/></marker>
+  <marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#f85149"/></marker>
+  <marker id="at" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#39d0d8"/></marker>
+  <marker id="ao" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#d29922"/></marker>
+  <filter id="gvck">
+    <feGaussianBlur stdDeviation="3" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+</defs>
+
+<!-- ══════════════════════════════════════════
+     ROW 0 — End Users (merged) + Admin
+════════════════════════════════════════════ -->
+
+<!-- End Users (Nhà đầu tư lẻ + Tổ chức/Bot) — merged -->
+<rect x="120" y="18" width="230" height="68" rx="8" fill="#0d2544" stroke="#388bfd" stroke-width="1.5"/>
+<text x="235" y="42" text-anchor="middle" font-size="13" font-weight="700" fill="#79c0ff">👤 Nhà đầu tư / Tổ chức</text>
+<text x="235" y="58" text-anchor="middle" font-size="10" fill="#8b949e">Retail Investor · Institutional · Algo Bot</text>
+<text x="235" y="72" text-anchor="middle" font-size="10" fill="#8b949e">Browser / Desktop App / Trading System</text>
+
+<!-- Admin User -->
+<rect x="570" y="18" width="230" height="68" rx="8" fill="#1a0e2b" stroke="#8957e5" stroke-width="1.5"/>
+<text x="685" y="42" text-anchor="middle" font-size="13" font-weight="700" fill="#bc8cff">🛡 Quản trị viên</text>
+<text x="685" y="58" text-anchor="middle" font-size="10" fill="#8b949e">Admin / Operator</text>
+<text x="685" y="72" text-anchor="middle" font-size="10" fill="#8b949e">Market Control · Configuration</text>
+
+<!-- User → UI arrows -->
+<line x1="235" y1="86" x2="235" y2="148" stroke="#388bfd" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ab)"/>
+<line x1="685" y1="86" x2="685" y2="148" stroke="#8957e5" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ap)"/>
+
+<!-- ══════════════════════════════════════════
+     ROW 1 — UI Layer
+════════════════════════════════════════════ -->
+
+<!-- Client Terminal :5173 -->
+<rect x="80" y="150" width="310" height="76" rx="8" fill="#0d2544" stroke="#388bfd" stroke-width="1.5"/>
+<text x="235" y="174" text-anchor="middle" font-size="12" font-weight="700" fill="#79c0ff">Client Terminal</text>
+<text x="235" y="190" text-anchor="middle" font-size="10" fill="#8b949e">React + Vite · Giao diện đặt lệnh</text>
+<rect x="166" y="200" width="138" height="18" rx="4" fill="#1f3a5f"/>
+<text x="235" y="213" text-anchor="middle" font-size="11" font-weight="700" fill="#58a6ff">Đặt lệnh, xem order book, theo dõi trade feed real-time</text>
+
+<!-- Admin Panel :3001 -->
+<rect x="530" y="150" width="310" height="76" rx="8" fill="#1a0e2b" stroke="#8957e5" stroke-width="1.5"/>
+<text x="685" y="174" text-anchor="middle" font-size="12" font-weight="700" fill="#bc8cff">Admin Panel</text>
+<text x="685" y="190" text-anchor="middle" font-size="10" fill="#8b949e">React + Vite · Quản lý thị trường</text>
+<rect x="616" y="200" width="138" height="18" rx="4" fill="#2a1a4a"/>
+<text x="685" y="213" text-anchor="middle" font-size="11" font-weight="700" fill="#8957e5">Mở/đóng phiên, chỉnh stock config, xem logs và số client</text>
+
+<!-- ══════════════════════════════════════════
+     ROW 2 — FIX TCP Server + FastAPI Engine
+════════════════════════════════════════════ -->
+
+<!-- FIX TCP Server :9876 -->
+<rect x="80" y="306" width="310" height="82" rx="8" fill="#2b0e0e" stroke="#f85149" stroke-width="1.5"/>
+<text x="235" y="330" text-anchor="middle" font-size="13" font-weight="700" fill="#ff7b72">FIX TCP Server </text>
+<text x="235" y="348" text-anchor="middle" font-size="10" fill="#8b949e">Nhận lệnh từ Client Terminal</text>
+<!--<text x="235" y="348" text-anchor="middle" font-size="10" fill="#8b949e">asyncio · FIXClientHandler · simplefix</text>
+<text x="235" y="364" text-anchor="middle" font-size="10" fill="#f85149">NewOrderSingle (D) · ExecutionReport (8)</text>
+<text x="235" y="380" text-anchor="middle" font-size="9" fill="#8b949e">Heartbeat · Sequence numbers · per-conn session</text>-->
+
+<!-- FastAPI Engine :8000 -->
+<rect x="530" y="306" width="310" height="82" rx="10" fill="#0d2b14" stroke="#3fb950" stroke-width="2"/>
+<text x="685" y="330" text-anchor="middle" font-size="13" font-weight="700" fill="#56d364">⚡ FASTAPI Engine</text>
+<text x="685" y="348" text-anchor="middle" font-size="10" fill="#8b949e">REST Router · AppState Singleton · match_order()</text>
+<text x="685" y="364" text-anchor="middle" font-size="10" fill="#3fb950">Gateway nhận REST + WebSocket, validate input, điều phối matching</text>
+<text x="553" y="380" font-size="9" fill="#3fb950">POST /api/orders</text>
+<text x="660" y="380" font-size="9" fill="#3fb950">WS /ws/market-data</text>
+<text x="765" y="380" font-size="9" fill="#3fb950">WS /ws/admin</text>
+
+<!-- ── Client Terminal → FIX TCP (FIX 4.4 order submission) ── -->
+<line x1="235" y1="226" x2="235" y2="304" stroke="#f85149" stroke-width="2" marker-end="url(#ar)"/>
+<text x="243" y="262" font-size="9" fill="#f85149">FIX 4.4 Protocol</text>
+
+<!-- Engine → Client via WS :8765 (market data broadcast) -->
+<path d="M 160 304 Q 120 272 112 226" stroke="#39d0d8" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#at)"/>
+<text x="95" y="270" font-size="9" fill="#39d0d8" text-anchor="end">client ws://:8765</text>
+<text x="95" y="282" font-size="9" fill="#39d0d8" text-anchor="end">market-data</text>
+
+<!-- FIX → Engine (same event loop, internal call) -->
+<line x1="392" y1="338" x2="528" y2="338" stroke="#f85149" stroke-width="1.5" marker-end="url(#ar)"/>
+<text x="460" y="330" text-anchor="middle" font-size="9" fill="#f85149">match_order()</text>
+<line x1="528" y1="356" x2="392" y2="356" stroke="#f85149" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#ar)"/>
+<!--<text x="460" y="372" text-anchor="middle" font-size="9" fill="#f85149">ExecutionReport(8)</text>-->
+
+<!-- Admin → Engine REST -->
+<path d="M 720 226 Q 740 268 742 304" stroke="#8957e5" stroke-width="1.5" fill="none" marker-end="url(#ap)"/>
+<text x="748" y="268" font-size="9" fill="#8957e5">REST /api/</text>
+
+<!-- Engine → Admin WS -->
+<path d="M 688 304 Q 680 268 650 226" stroke="#3fb950" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#ag)"/>
+<text x="614" y="270" font-size="9" fill="#3fb950">ws://:8000/ws/admin</text>
+
+<!-- Engine broadcasts market data to FIX clients (via FIX server relay) -->
+<path d="M 592 388 Q 480 400 390 388" stroke="#39d0d8" stroke-width="1.2" fill="none" stroke-dasharray="3,3" marker-end="url(#at)"/>
+<text x="490" y="400" text-anchor="middle" font-size="8" fill="#39d0d8">broadcast trade result</text>
+
+<!-- ══════════════════════════════════════════
+     ROW 3 — Order Books
+════════════════════════════════════════════ -->
+<rect x="60"  y="462" width="158" height="76" rx="8" fill="#2b1d0e" stroke="#d29922" stroke-width="1.5"/>
+<text x="139" y="486" text-anchor="middle" font-size="12" font-weight="700" fill="#e3b341">OrderBook[ACB]</text>
+<text x="139" y="502" text-anchor="middle" font-size="10" fill="#8b949e">SortedDict</text>
+<text x="139" y="518" text-anchor="middle" font-size="10" fill="#8b949e">Bids(neg) · Asks(pos)</text>
+<text x="139" y="532" text-anchor="middle" font-size="9" fill="#d29922">FIFO per price level</text>
+
+<rect x="381" y="462" width="158" height="76" rx="8" fill="#2b1d0e" stroke="#d29922" stroke-width="1.5"/>
+<text x="460" y="486" text-anchor="middle" font-size="12" font-weight="700" fill="#e3b341">OrderBook[FPT]</text>
+<text x="460" y="502" text-anchor="middle" font-size="10" fill="#8b949e">SortedDict</text>
+<text x="460" y="518" text-anchor="middle" font-size="10" fill="#8b949e">Bids(neg) · Asks(pos)</text>
+<text x="460" y="532" text-anchor="middle" font-size="9" fill="#d29922">FIFO per price level</text>
+
+<!-- VCK highlighted -->
+<rect x="702" y="452" width="168" height="96" rx="8" fill="#0b2429" stroke="#39d0d8" stroke-width="2.5" filter="url(#gvck)"/>
+<text x="786" y="476" text-anchor="middle" font-size="13" font-weight="700" fill="#56d4db">OrderBook[VCK]</text>
+<text x="786" y="502" text-anchor="middle" font-size="10" fill="#8b949e">SortedDict</text>
+<text x="786" y="518" text-anchor="middle" font-size="10" fill="#8b949e">Bids(neg) · Asks(pos)</text>
+<text x="786" y="532" text-anchor="middle" font-size="9" fill="#d29922">FIFO per price level</text>
+
+<!-- Engine → OrderBooks -->
+<path d="M 620 388 Q 500 424 140 460" stroke="#d29922" stroke-width="1.3" fill="none" marker-end="url(#ao)"/>
+<path d="M 660 388 Q 580 424 462 460" stroke="#d29922" stroke-width="1.3" fill="none" marker-end="url(#ao)"/>
+<path d="M 750 388 L 786 450" stroke="#39d0d8" stroke-width="2" fill="none" marker-end="url(#at)"/>
+
+<!-- ══════════════════════════════════════════
+     ROW 4 — Trade History & Broadcast
+════════════════════════════════════════════ -->
+<rect x="246" y="614" width="428" height="66" rx="8" fill="#161b22" stroke="#484f58" stroke-width="1.5"/>
+<text x="460" y="637" text-anchor="middle" font-size="12" font-weight="700" fill="#e6edf3">Trade History + WS Broadcast</text>
+<text x="460" y="654" text-anchor="middle" font-size="10" fill="#8b949e">Sequenced · Deterministic · Fills both sides (buyer + seller)</text>
+<text x="460" y="670" text-anchor="middle" font-size="10" fill="#3fb950">Trade(VCK, 12000, qty=200) → pushed to all WS subscribers</text>
+
+<!-- OrderBooks → Trade -->
+<path d="M 139 538 Q 138 578 244 622" stroke="#484f58" stroke-width="1.2" stroke-dasharray="3,3" fill="none" marker-end="url(#a)"/>
+<path d="M 460 538 L 460 612" stroke="#484f58" stroke-width="1.2" stroke-dasharray="3,3" fill="none" marker-end="url(#a)"/>
+<path d="M 786 548 Q 760 584 676 624" stroke="#39d0d8" stroke-width="1.5" stroke-dasharray="3,3" fill="none" marker-end="url(#at)"/>
+
+<!-- ══ Step circles ══ -->
+<circle cx="100" cy="168" r="9" fill="#1f6feb"/>
+<text x="100" y="172" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">2</text>
+
+<circle cx="558" cy="168" r="9" fill="#8957e5"/>
+<text x="558" y="172" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">1</text>
+
+<circle cx="100" cy="325" r="9" fill="#f85149"/>
+<text x="100" y="329" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">3</text>
+
+<circle cx="540" cy="325" r="9" fill="#3fb950"/>
+<text x="540" y="329" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">4</text>
+
+<circle cx="707" cy="470" r="9" fill="#39d0d8"/>
+<text x="707" y="474" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">5</text>
+
+<circle cx="460" cy="618" r="9" fill="#484f58"/>
+<text x="460" y="622" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">6</text>
+
+<!-- ══ Legend ══ -->
+<rect x="30" y="614" width="200" height="82" rx="6" fill="#161b22" stroke="#21262d"/>
+<text x="130" y="632" text-anchor="middle" font-size="10" font-weight="700" fill="#8b949e">Chú thích</text>
+<line x1="42" y1="644" x2="72" y2="644" stroke="#f85149" stroke-width="2" marker-end="url(#ar)"/>
+<text x="78" y="648" font-size="9" fill="#ff7b72">FIX 4.4 (order submit)</text>
+<line x1="42" y1="660" x2="72" y2="660" stroke="#39d0d8" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#at)"/>
+<text x="78" y="664" font-size="9" fill="#56d4db">WS push / broadcast</text>
+<line x1="42" y1="676" x2="72" y2="676" stroke="#8957e5" stroke-width="1.5" marker-end="url(#ap)"/>
+<text x="78" y="680" font-size="9" fill="#bc8cff">REST /api/*</text>
+<line x1="42" y1="692" x2="72" y2="692" stroke="#d29922" stroke-width="1.5" marker-end="url(#ao)"/>
+<text x="78" y="696" font-size="9" fill="#e3b341">match_order() call</text>
+
+</svg>
+</div>
+      </div>
+
+      <!-- RIGHT: key facts -->
+      <div class="col" style="gap: 10px;">
+		<div class="card" style="padding:14px 16px">
+          <h3 class="yellow" style="margin-bottom:10px">FIX 4.4 Protocol - Financial Information eXchange</h3>
+          <div style="display:flex;flex-direction:column;gap:6px">
+			<div style="display:flex;gap:10px;align-items:flex-start">
+              <span style="font-size:16px;flex-shrink:0">🔧</span>
+              <div style="font-size:13px"><strong style="color:var(--accent4)">Cấu trúc gói tin</strong> — Mỗi trường là một cặp <code>Tag=Value</code> ngăn cách bởi ký tự <code>SOH</code> (hiển thị là <code style="color:var(--accent3)">|</code>)</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <span style="font-size:16px;flex-shrink:0">⚡</span>
+              <div style="font-size:13px"><strong style="color:var(--yellow)">Tốc độ microsecond</strong> — Text thuần, không overhead, parse trong vài µs</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <span style="font-size:16px;flex-shrink:0">🔒</span>
+              <div style="font-size:13px"><strong style="color:var(--accent2)">Không mất lệnh</strong> — SeqNum + ResendRequest đảm bảo toàn vẹn dữ liệu</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <span style="font-size:16px;flex-shrink:0">🌍</span>
+              <div style="font-size:13px"><strong style="color:var(--accent)">Ngôn ngữ chung</strong> — NYSE, NASDAQ, HKEX, HOSE, HNX đều dùng → tích hợp dễ dàng</div>
+            </div>
+            
+          </div>
+        </div>
+		
+		<div class="col">
+    <div class="card" style="padding:14px 16px">
+        <h3 style="color:var(--accent4);margin-bottom:10px">🚀 FastAPI Gateway</h3>
+        <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">📥</span>
+                <div style="font-size:13px"><strong style="color:var(--accent4)">Tiếp nhận</strong> — Nhận lệnh từ Client UI qua endpoint <code style="color:var(--accent3)">POST /api/orders</code></div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">📡</span>
+                <div style="font-size:13px"><strong style="color:var(--accent4)">Broadcast</strong> — Duy trì kết nối <code>WebSocket</code> để đẩy dữ liệu TradeFeed lên bảng điện tử</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">🛡️</span>
+                <div style="font-size:13px"><strong style="color:var(--accent4)">Trung chuyển</strong> — Xác thực tính hợp lệ sơ bộ trước khi đẩy lệnh vào lõi xử lý</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="padding:14px 16px">
+        <h3 style="color:var(--accent2);margin-bottom:10px">⚙️ Matching Engine</h3>
+        <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">⚔️</span>
+                <div style="font-size:13px"><strong style="color:var(--accent2)">Đối ứng</strong> — So khớp <code>Bids/Asks</code> liên tục dựa trên thuật toán ưu tiên Giá và Thời gian</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">⚡</span>
+                <div style="font-size:13px"><strong style="color:var(--accent2)">Tốc độ</strong> — Xử lý <code>In-Memory</code> trên RAM giúp đạt hiệu năng khớp lệnh micro giây</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">💎</span>
+                <div style="font-size:13px"><strong style="color:var(--accent2)">Khớp lệnh</strong> — Tạo giao dịch (Trade), cập nhật số dư và thông báo cho Broadcast</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="padding:14px 16px">
+        <h3 style="color:var(--accent);margin-bottom:10px">📊 OrderBook</h3>
+        <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">🗂️</span>
+                <div style="font-size:13px"><strong style="color:var(--accent)">Cấu trúc</strong> — Sử dụng <code>SortedDict</code> để tự động sắp xếp hàng đợi lệnh chờ khớp</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">🔄</span>
+                <div style="font-size:13px"><strong style="color:var(--accent)">Ưu tiên</strong> — Áp dụng Key âm cho Mua và Key dương cho Bán để tối ưu tốc độ tìm kiếm</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">⏳</span>
+                <div style="font-size:13px"><strong style="color:var(--accent)">FIFO</strong> — Đảm bảo tính công bằng: lệnh đến trước tại cùng mức giá sẽ được ưu tiên trước</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="padding:14px 16px">
+        <h3 class="yellow" style="margin-bottom:10px">🔌 FIX Server (9876)</h3>
+        <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">🏗️</span>
+                <div style="font-size:13px"><strong style="color:var(--yellow)">Kết nối</strong> — TCP Native chuyên dụng cho Algo-trading bot và các tổ chức bên ngoài</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">🔄</span>
+                <div style="font-size:13px"><strong style="color:var(--yellow)">Đồng bộ</strong> — Chạy chung <code>Event Loop</code> với FastAPI đảm bảo dữ liệu luôn tuần tự</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">✉️</span>
+                <div style="font-size:13px"><strong style="color:var(--yellow)">Giải mã</strong> — Chuyển đổi bản tin <code>Tag=Value</code> trực tiếp vào RAM chỉ sau vài µs</div>
+            </div>
+        </div>
+    </div>
+</div>
+		
+        <!--<div class="card">
+          <h3 class="yellow">Tech Stack</h3>
+          <div class="row" style="gap:8px">
+            <span class="tag">Python 3.14</span>
+            <span class="tag">FastAPI</span>
+            <span class="tag">Uvicorn</span>
+            <span class="tag">simplefix</span>
+            <span class="tag">SortedDict</span>
+            <span class="tag green">React</span>
+            <span class="tag green">Vite 6</span>
+            <span class="tag purple">WebSocket</span>
+            <span class="tag yellow">FIX 4.4</span>
+          </div>
+        </div>
+        <div class="card">
+          <h3 class="purple">3 Supported Symbols</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:4px">
+            <div style="text-align:center;padding:8px;background:rgba(88,166,255,0.08);border-radius:8px;border:1px solid rgba(88,166,255,0.2)">
+              <div style="font-weight:700;font-size:16px;color:var(--accent)">ACB</div>
+            </div>
+            <div style="text-align:center;padding:8px;background:rgba(63,185,80,0.08);border-radius:8px;border:1px solid rgba(63,185,80,0.2)">
+              <div style="font-weight:700;font-size:16px;color:var(--accent2)">FPT</div>
+            </div>
+            <div style="text-align:center;padding:8px;background:rgba(210,168,255,0.08);border-radius:8px;border:1px solid rgba(210,168,255,0.2)">
+              <div style="font-weight:700;font-size:16px;color:var(--accent4)">VCK</div>
+            </div>
+          </div>
+        </div> -->
+      </div>
+    </div>
+  </div>
+
+
+
+
+</body>
+</html>
