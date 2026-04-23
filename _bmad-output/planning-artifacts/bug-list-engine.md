@@ -6,7 +6,8 @@
 ---
 
 ## ECH-ENGINE-001
-- [ ] Fixed
+- [x] Fixed
+- **Fix-summary:** Đổi `_match` từ LIFO sang FIFO: `resting = queue[0]` (thay cho `queue[-1]`) và `queue.popleft()` (thay cho `queue.pop()`) trong `order_book.py`. Thêm regression test `tests/unit/test_ech_engine_001_fifo.py` (bid FIFO + ask FIFO) — fail trước fix, pass sau fix; test cũ `test_time_priority_at_same_price` (baseline đang fail) cũng pass. 3 failure còn lại trong `test_order_book.py` là pre-existing (bug `fill_price` khác, ngoài phạm vi).
 - **Severity:** P0 Blocker
 - **Module / Location:** `matching-engine/exchange/engine/src/engine/order_book.py:157-213` (kết hợp `matching-engine/exchange/engine/src/engine/order_book.py:215-220`)
 - **Description:** Matching engine vi phạm nguyên tắc **price-time priority (FIFO)** – chọn lệnh resting MỚI NHẤT (LIFO) thay vì cũ nhất ở cùng một mức giá.
