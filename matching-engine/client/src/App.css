@@ -332,6 +332,54 @@ td {
   font-size: 12px;
 }
 
+.chart-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.chart-controls button {
+  padding: 4px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.chart-controls button:hover {
+  border-color: var(--accent);
+}
+
+.chart-controls button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.chart-legend {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  z-index: 10;
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--text-dim);
+  pointer-events: none;
+}
+
+.chart-legend b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.chart-legend .legend-vol {
+  color: #2196f3;
+}
+
 /* === Scrollbar === */
 ::-webkit-scrollbar {
   width: 6px;

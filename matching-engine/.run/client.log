@@ -7,3 +7,22 @@
 
   ➜  Local:   http://localhost:5173/
   ➜  Network: use --host to expose
+2:21:11 PM [vite] (client) hmr update /src/components/PriceChart.jsx
+2:21:12 PM [vite] (client) ✨ new dependencies optimized: lightweight-charts
+2:21:12 PM [vite] (client) ✨ optimized dependencies changed. reloading
+2:21:17 PM [vite] (client) hmr update /src/App.css
+2:21:21 PM [vite] (client) hmr update /src/App.jsx
+2:25:24 PM [vite] (client) hmr update /src/components/PriceChart.jsx
+2:25:54 PM [vite] (client) hmr update /src/components/PriceChart.jsx
+2:29:43 PM [vite] (client) hmr update /src/components/PriceChart.jsx
+2:29:48 PM [vite] (client) hmr update /src/components/PriceChart.jsx
+2:30:42 PM [vite] (client) hmr update /src/components/PriceChart.jsx
+2:30:47 PM [vite] (client) hmr update /src/components/PriceChart.jsx
+2:30:58 PM [vite] (client) hmr update /src/components/PriceChart.jsx
+2:31:52 PM [vite] (client) hmr update /src/App.jsx
+2:32:00 PM [vite] (client) hmr update /src/components/PriceChart.jsx
+2:33:05 PM [vite] (client) hmr update /src/components/PriceChart.jsx
+2:34:09 PM [vite] (client) hmr update /src/components/PriceChart.jsx
+2:34:17 PM [vite] (client) hmr update /src/components/PriceChart.jsx
+2:34:24 PM [vite] (client) hmr update /src/components/PriceChart.jsx
+2:34:34 PM [vite] (client) hmr update /src/App.css
