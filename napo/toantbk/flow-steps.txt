@@ -1,28 +1,29 @@
-1. Nap context *3*
-/bmad-generate-project-context theo huong dan @napo\toantbk\step1-generate-project-context.md
+1. Nap context
+/bmad-generate-project-context theo hướng dẫn @napo\toantbk\step1-generate-project-context.md
 
-2. Document project *7*
-/bmad-document-project theo huong dan @napo\toantbk\step2-document-project.md
+2. Document project
+/bmad-document-project theo hướng dẫn @napo\toantbk\step2-document-project.md
 
 3. Tao CLAUDE.md
-/init lấy context từ @_bmad-output/project-context.md và cac documents trong @_bmad-output
+/init lấy context từ @_bmad-output/project-context.md và các documents trong @_bmad-output
 
 4. Tim bugs
-/bmad-review-edge-case-hunter cho module @matching-engine\exchange\admin theo huong dan @napo\toantbk\step3-bug-report-schema.md
-/bmad-review-edge-case-hunter cho module @matching-engine\exchange\engine theo huong dan @napo\toantbk\step3-bug-report-schema.md
-/bmad-review-edge-case-hunter cho module @matching-engine\client theo huong dan @napo\toantbk\step3-bug-report-schema.md
+/bmad-review-edge-case-hunter cho module @matching-engine\exchange\admin theo hướng dẫn @napo\toantbk\step3-bug-report-schema.md
+/bmad-review-edge-case-hunter cho module @matching-engine\exchange\engine theo hướng dẫn @napo\toantbk\step3-bug-report-schema.md
+/bmad-review-edge-case-hunter cho module @matching-engine\client theo hướng dẫn @napo\toantbk\step3-bug-report-schema.md
 
 5. Fix bugs
-/bmad-quick-dev fix bug cho module @matching-engine\exchange\admin theo huong dan @napo\toantbk\step4-fix-bug.md
-/bmad-quick-dev fix bug cho module @matching-engine\exchange\engine theo huong dan @napo\toantbk\step4-fix-bug.md
-/bmad-quick-dev fix bug cho module @matching-engine\client theo huong dan @napo\toantbk\step4-fix-bug.md
+/bmad-quick-dev fix bug cho module @matching-engine\exchange\admin theo hướng dẫn @napo\toantbk\step4-fix-bug.md
+/bmad-quick-dev fix bug cho module @matching-engine\exchange\engine theo hướng dẫn @napo\toantbk\step4-fix-bug.md
+/bmad-quick-dev fix bug cho module @matching-engine\client theo hướng dẫn @napo\toantbk\step4-fix-bug.md
 
 6. Merge code fix
-/bmad-quick-dev merge code theo huong dan @napo\toantbk\step5-merge-code-fix-bug.md cho bug id ... 
+/bmad-quick-dev merge code theo hướng dẫn @napo\toantbk\step5-merge-code-fix-bug.md cho bug id ... 
 
 
 
 ================
 optional:
 /bmad-quick-dev chạy lại các unit test đã có để verify các bug đã fix trong @planning-artifacts
+/bmad-qa-generate-e2e-tests
 /bmad-review-adversarial-general cho các modules..
