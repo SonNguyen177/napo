@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { getLogKey, findExpandedLog } from "../lib/commLogIdentity.js";
 
 export default function CommLogs({ logs }) {
@@ -41,9 +41,8 @@ export default function CommLogs({ logs }) {
               const key = getLogKey(log);
               const isExpanded = expandedKey !== null && key === expandedKey;
               return (
-                <>
+                <Fragment key={`${key}-${i}`}>
                   <tr
-                    key={`${key}-${i}`}
                     className={`log-row ${log.direction.toLowerCase()}`}
                     onClick={() =>
                       setExpandedKey(isExpanded ? null : key)
@@ -61,13 +60,13 @@ export default function CommLogs({ logs }) {
                     <td>{log.summary}</td>
                   </tr>
                   {isExpanded && expandedLog?.fix_raw && (
-                    <tr key={`${key}-${i}-fix`} className="fix-row">
+                    <tr className="fix-row">
                       <td colSpan="5">
                         <code className="fix-raw">{expandedLog.fix_raw}</code>
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               );
             })}
             {display.length === 0 && (
