@@ -64,7 +64,8 @@
 ---
 
 ## ECH-ENGINE-003
-- [ ] Fixed
+- [x] Fixed
+- **Fix-summary:** Code-fix cho bug này đã được landed cùng commit ECH-ENGINE-002 (`ws_server._handle_new_order` đã có guard `if price < 0: reject` ngay sau guard `quantity <= 0`, reject sớm với `{"type":"error","message":"Invalid order: price must be non-negative, got <n>"}` — giá trị âm không còn tới được envelope guard `os._exit(1)` trong `MatchingEngine.submit_order`). Thêm regression test riêng `tests/unit/test_ech_engine_003_invalid_price.py` (price=-1 và price=-999_999) — monkeypatch `os._exit` để verify engine không bị kill; verify-by-revert: fail khi tạm gỡ guard, pass sau khi khôi phục. 3 failure pre-existing trong `test_order_book.py` là bug `fill_price` khác, ngoài phạm vi.
 - **Severity:** P0 Blocker
 - **Module / Location:** `matching-engine/exchange/engine/src/engine/ws_server.py:124-147` (kết hợp `matching-engine/exchange/engine/src/engine/matching.py:80-83`)
 - **Description:** DoS – client gửi `price` âm cũng giết engine (cùng pattern với qty âm).
