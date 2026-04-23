@@ -216,6 +216,7 @@ async def test_trade_broadcast_to_all(server):
         await ws1.send(json.dumps({
             "type": "new_order",
             "cl_ord_id": "S1",
+            "account": "SELLER",
             "symbol": "VCK",
             "side": "SELL",
             "ord_type": "LIMIT",
@@ -232,6 +233,7 @@ async def test_trade_broadcast_to_all(server):
         await ws2.send(json.dumps({
             "type": "new_order",
             "cl_ord_id": "B1",
+            "account": "BUYER",
             "symbol": "VCK",
             "side": "BUY",
             "ord_type": "LIMIT",
@@ -376,6 +378,7 @@ async def test_market_closed_rejects_order(server):
         await ws.send(json.dumps({
             "type": "new_order",
             "cl_ord_id": "CLOSED-TEST",
+            "account": "ACC1",
             "symbol": "FPT",
             "side": "BUY",
             "ord_type": "LIMIT",

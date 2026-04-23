@@ -63,6 +63,8 @@ class Order:
 
     def fill(self, qty: int, price: int) -> None:
         """Apply a fill of `qty` at `price`."""
+        if self.status in (OrdStatus.FILLED, OrdStatus.CANCELLED, OrdStatus.REJECTED):
+            raise ValueError(f"Cannot fill order in terminal state {self.status.value}")
         total_cost = self.avg_px * self.filled_qty + price * qty
         self.filled_qty += qty
         self.leaves_qty = self.quantity - self.filled_qty
@@ -73,6 +75,8 @@ class Order:
             self.status = OrdStatus.PARTIALLY_FILLED
 
     def cancel(self) -> None:
+        if self.status in (OrdStatus.FILLED, OrdStatus.CANCELLED, OrdStatus.REJECTED):
+            raise ValueError(f"Cannot cancel order in terminal state {self.status.value}")
         self.status = OrdStatus.CANCELLED
         self.leaves_qty = 0
 

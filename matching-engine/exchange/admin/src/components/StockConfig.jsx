@@ -23,7 +23,28 @@ function StockRow({ symbol, config, onSave }) {
     setError("");
   };
 
+  const validateForm = () => {
+    for (const { key, label } of FIELDS) {
+      const v = form[key];
+      if (!Number.isInteger(v) || v <= 0) {
+        return `${label} phải là số nguyên dương`;
+      }
+    }
+    if (form.ceiling <= form.floor) {
+      return `Ceiling (${form.ceiling}) phải lớn hơn Floor (${form.floor})`;
+    }
+    if (form.ceiling - form.floor < form.price_step) {
+      return `Khoảng (Ceiling - Floor) = ${form.ceiling - form.floor} phải >= Price Step (${form.price_step})`;
+    }
+    return "";
+  };
+
   const handleSave = async () => {
+    const validationErr = validateForm();
+    if (validationErr) {
+      setError(validationErr);
+      return;
+    }
     try {
       await onSave(symbol, form);
       setEditing(false);

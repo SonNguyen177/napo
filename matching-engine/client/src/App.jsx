@@ -6,7 +6,7 @@ import PriceChart from "./components/PriceChart";
 import "./App.css";
 
 function App() {
-  const { connected, snapshots, orderBooks, trades, execReports, sendOrder } =
+  const { connected, snapshots, orderBooks, trades, execReports, marketState, sendOrder } =
     useWebSocket();
 
   return (
@@ -16,6 +16,10 @@ function App() {
         <span className={`status ${connected ? "connected" : "disconnected"}`}>
           {connected ? "Connected" : "Disconnected"}
         </span>
+        <span className={`status ${marketState === "OPEN" ? "connected" : "disconnected"}`}
+              style={{ marginLeft: 12 }}>
+          Market: {marketState}
+        </span>
       </header>
       <div className="app-layout">
         <aside className="left-panel">
@@ -23,6 +27,7 @@ function App() {
             sendOrder={sendOrder}
             execReports={execReports}
             snapshots={snapshots}
+            marketState={marketState}
           />
         </aside>
         <main className="right-panel">

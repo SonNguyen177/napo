@@ -9,10 +9,16 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field
 
 from engine.matching import MatchingEngine
 from engine.ws_server import ExchangeWSServer
+
+
+# Upper bounds keep admin from storing values that don't fit reasonable
+# exchange semantics and would lock a symbol (see E2E-011/E2E-042).
+_MAX_PRICE = 10**12  # 1 trillion VND — well beyond any real-world stock price.
+_MAX_STEP = 10**9
 
 
 # --- Pydantic models for request/response ---
@@ -27,17 +33,10 @@ class StockConfigResponse(BaseModel):
 
 
 class StockConfigUpdate(BaseModel):
-    floor: int | None = None
-    ceiling: int | None = None
-    price_step: int | None = None
-    qty_step: int | None = None
-
-    @field_validator("floor", "ceiling", "price_step", "qty_step", mode="before")
-    @classmethod
-    def must_be_positive(cls, v: int | None) -> int | None:
-        if v is not None and v <= 0:
-            raise ValueError("Value must be positive")
-        return v
+    floor: int | None = Field(default=None, gt=0, le=_MAX_PRICE)
+    ceiling: int | None = Field(default=None, gt=0, le=_MAX_PRICE)
+    price_step: int | None = Field(default=None, gt=0, le=_MAX_STEP)
+    qty_step: int | None = Field(default=None, gt=0, le=_MAX_STEP)
 
 
 class MarketStateResponse(BaseModel):
@@ -114,12 +113,16 @@ def create_app(
     @app.post("/api/market/start", response_model=MarketStateResponse)
     async def start_market():
         engine.config.open_market()
-        return MarketStateResponse(state=engine.config.market_state.value)
+        state = engine.config.market_state.value
+        await ws_server.broadcast_market_state(state)
+        return MarketStateResponse(state=state)
 
     @app.post("/api/market/stop", response_model=MarketStateResponse)
     async def stop_market():
         engine.config.close_market()
-        return MarketStateResponse(state=engine.config.market_state.value)
+        state = engine.config.market_state.value
+        await ws_server.broadcast_market_state(state)
+        return MarketStateResponse(state=state)
 
     @app.get("/api/market/state", response_model=MarketStateResponse)
     async def get_market_state():
@@ -150,16 +153,36 @@ def create_app(
 
     @app.put("/api/stocks/{symbol}", response_model=StockConfigResponse)
     async def update_stock(symbol: str, body: StockConfigUpdate):
+        from fastapi.responses import JSONResponse
+
         updates = {k: v for k, v in body.model_dump().items() if v is not None}
         if not updates:
-            from fastapi.responses import JSONResponse
             return JSONResponse(status_code=400, content={"detail": "No fields to update"})
 
-        updated = engine.update_stock_config(symbol.upper(), **updates)
-        if updated is None:
-            from fastapi.responses import JSONResponse
+        current = engine.config.get_stock(symbol.upper())
+        if current is None:
             return JSONResponse(status_code=404, content={"detail": f"Unknown symbol: {symbol}"})
 
+        # Compute post-update values and validate invariants BEFORE applying.
+        # Critical: engine._handle_new_order fatal-exits if ceiling <= floor, so
+        # we must never let the admin put the book into that state.
+        new_floor = updates.get("floor", current.floor)
+        new_ceiling = updates.get("ceiling", current.ceiling)
+        new_price_step = updates.get("price_step", current.price_step)
+
+        if new_ceiling <= new_floor:
+            return JSONResponse(status_code=400, content={
+                "detail": f"ceiling ({new_ceiling}) must be greater than floor ({new_floor})"
+            })
+        if new_ceiling - new_floor < new_price_step:
+            return JSONResponse(status_code=400, content={
+                "detail": (
+                    f"ceiling - floor ({new_ceiling - new_floor}) must be >= "
+                    f"price_step ({new_price_step})"
+                )
+            })
+
+        updated = engine.update_stock_config(symbol.upper(), **updates)
         return StockConfigResponse(
             symbol=updated.symbol, floor=updated.floor, ceiling=updated.ceiling,
             price_step=updated.price_step, qty_step=updated.qty_step,

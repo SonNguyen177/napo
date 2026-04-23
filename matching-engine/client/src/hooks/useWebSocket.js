@@ -10,6 +10,7 @@ export default function useWebSocket() {
   const [orderBooks, setOrderBooks] = useState({});
   const [trades, setTrades] = useState([]);
   const [execReports, setExecReports] = useState([]);
+  const [marketState, setMarketState] = useState("CLOSED");
   const reconnectTimer = useRef(null);
 
   useEffect(() => {
@@ -59,6 +60,11 @@ export default function useWebSocket() {
               ...prev,
               [msg.symbol]: { bids: msg.bids, asks: msg.asks },
             }));
+            if (msg.market_state) setMarketState(msg.market_state);
+            break;
+
+          case "market_state":
+            setMarketState(msg.state);
             break;
 
           case "market_update":
@@ -137,6 +143,7 @@ export default function useWebSocket() {
     orderBooks,
     trades,
     execReports,
+    marketState,
     sendOrder,
   };
 }
