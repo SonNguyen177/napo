@@ -2,35 +2,10 @@
 > client@0.0.0 dev
 > vite
 
+[2m3:00:33 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because lockfile has changed
 
-  VITE v8.0.3  ready in 635 ms
+  [32m[1mVITE[22m v8.0.3[39m  [2mready in [0m[1m226[22m[2m[0m ms[22m
 
-  ➜  Local:   http://localhost:5173/
-  ➜  Network: use --host to expose
-2:21:11 PM [vite] (client) hmr update /src/components/PriceChart.jsx
-2:21:12 PM [vite] (client) ✨ new dependencies optimized: lightweight-charts
-2:21:12 PM [vite] (client) ✨ optimized dependencies changed. reloading
-2:21:17 PM [vite] (client) hmr update /src/App.css
-2:21:21 PM [vite] (client) hmr update /src/App.jsx
-2:25:24 PM [vite] (client) hmr update /src/components/PriceChart.jsx
-2:25:54 PM [vite] (client) hmr update /src/components/PriceChart.jsx
-2:29:43 PM [vite] (client) hmr update /src/components/PriceChart.jsx
-2:29:48 PM [vite] (client) hmr update /src/components/PriceChart.jsx
-2:30:42 PM [vite] (client) hmr update /src/components/PriceChart.jsx
-2:30:47 PM [vite] (client) hmr update /src/components/PriceChart.jsx
-2:30:58 PM [vite] (client) hmr update /src/components/PriceChart.jsx
-2:31:52 PM [vite] (client) hmr update /src/App.jsx
-2:32:00 PM [vite] (client) hmr update /src/components/PriceChart.jsx
-2:33:05 PM [vite] (client) hmr update /src/components/PriceChart.jsx
-2:34:09 PM [vite] (client) hmr update /src/components/PriceChart.jsx
-2:34:17 PM [vite] (client) hmr update /src/components/PriceChart.jsx
-2:34:24 PM [vite] (client) hmr update /src/components/PriceChart.jsx
-2:34:34 PM [vite] (client) hmr update /src/App.css
-2:39:03 PM [vite] (client) hmr update /src/App.jsx
-2:39:10 PM [vite] (client) hmr update /src/components/MarketData.jsx
-2:39:15 PM [vite] (client) hmr update /src/components/MarketData.jsx
-2:39:31 PM [vite] (client) hmr update /src/components/MarketData.jsx
-2:39:36 PM [vite] (client) hmr update /src/App.css
-2:41:52 PM [vite] (client) hmr update /src/App.css
-2:42:11 PM [vite] (client) hmr update /src/App.css
-2:44:58 PM [vite] (client) hmr update /src/App.css
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
+[2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m
+[2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
