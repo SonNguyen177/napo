@@ -1,0 +1,2021 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lite Matching Engine — AI Hackathon</title>
+<style>
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #0d1117;
+  color: #e6edf3;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  padding: 28px 20px 48px;
+}
+h1 {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: #58a6ff;
+  margin-bottom: 4px;
+}
+.subtitle {
+  text-align: center;
+  font-size: 12px;
+  color: #8b949e;
+  margin-bottom: 28px;
+}
+.svg-wrap {
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto 36px;
+}
+.section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #58a6ff;
+  max-width: 920px;
+  margin: 0 auto 12px;
+  border-bottom: 1px solid #21262d;
+  padding-bottom: 6px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  max-width: 920px;
+  margin: 0 auto 28px;
+}
+.card {
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  padding: 11px 13px;
+}
+.card-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #58a6ff;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 7px;
+}
+.num {
+  background: #1f6feb;
+  color: #fff;
+  border-radius: 50%;
+  width: 18px; height: 18px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; flex-shrink: 0;
+}
+.card ul { list-style: none; }
+.card ul li {
+  font-size: 11px; color: #8b949e;
+  padding: 2px 0 2px 11px; position: relative;
+}
+.card ul li::before { content:'›'; position:absolute; left:0; color:#3fb950; }
+.card ul li code {
+  background:#21262d; padding:1px 4px; border-radius:3px;
+  font-family:monospace; font-size:10px; color:#e3b341;
+}
+.ep-wrap { max-width: 920px; margin: 0 auto 28px; }
+
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --yellow: #e3b341;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* ── DECK ── */
+  #deck {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    padding: 48px 64px;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+  .slide.active {
+    display: flex;
+    opacity: 1;
+  }
+
+  /* ── SLIDE HEADER ── */
+  .slide-label {
+    font-size: 16px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .slide-title {
+    font-size: 38px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 32px;
+  }
+  .slide-title .accent { color: var(--accent); }
+  .slide-title .green  { color: var(--accent2); }
+  .slide-title .red    { color: var(--accent3); }
+  .slide-title .purple { color: var(--accent4); }
+  .slide-title .yellow { color: var(--yellow); }
+
+  /* ── NAV ── */
+  #nav {
+    position: fixed;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 32px;
+    padding: 10px 20px;
+    z-index: 100;
+  }
+  #nav button {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 6px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+  }
+  #nav button:hover { background: var(--border); }
+  #nav button:disabled { opacity: 0.3; cursor: default; }
+  #counter { font-size: 13px; color: var(--muted); min-width: 56px; text-align: center; }
+
+  /* ── PROGRESS BAR ── */
+  #progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: var(--accent);
+    transition: width 0.35s ease;
+    z-index: 200;
+  }
+
+  /* ── SECTION BADGE ── */
+  .section-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    width: fit-content;
+  }
+  .section-badge .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  /* ── CONTENT HELPERS ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; flex: 1; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; flex: 1; }
+  .col     { display: flex; flex-direction: column; gap: 16px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+  }
+  .card h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+  }
+  .card h3.green  { color: var(--accent2); }
+  .card h3.red    { color: var(--accent3); }
+  .card h3.purple { color: var(--accent4); }
+  .card h3.yellow { color: var(--yellow); }
+
+  ul.list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  ul.list li {
+    font-size: 18px;
+    color: var(--text);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.5;
+  }
+  ul.list li::before { content: '▸'; color: var(--muted); flex-shrink: 0; margin-top: 1px; }
+
+  .tag {
+    display: inline-block;
+    background: rgba(88,166,255,0.12);
+    border: 1px solid rgba(88,166,255,0.3);
+    color: var(--accent);
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 15px;
+    font-family: 'Consolas', monospace;
+    font-weight: 600;
+  }
+  .tag.green  { background: rgba(63,185,80,0.12); border-color: rgba(63,185,80,0.3); color: var(--accent2); }
+  .tag.red    { background: rgba(247,129,102,0.12); border-color: rgba(247,129,102,0.3); color: var(--accent3); }
+  .tag.purple { background: rgba(210,168,255,0.12); border-color: rgba(210,168,255,0.3); color: var(--accent4); }
+  .tag.yellow { background: rgba(227,179,65,0.12); border-color: rgba(227,179,65,0.3); color: var(--yellow); }
+
+  code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 16px;
+    color: var(--accent4);
+  }
+
+  .mono {
+    font-family: 'Consolas', monospace;
+    font-size: 13px;
+    color: var(--muted);
+    background: #0a0e14;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    line-height: 1.7;
+    white-space: pre;
+    overflow: hidden;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 16px;
+    font-weight: 600;
+    border: 1px solid;
+  }
+  .pill.blue   { background: rgba(88,166,255,0.1); border-color: rgba(88,166,255,0.4); color: var(--accent); }
+  .pill.green  { background: rgba(63,185,80,0.1);  border-color: rgba(63,185,80,0.4);  color: var(--accent2); }
+  .pill.red    { background: rgba(247,129,102,0.1);border-color: rgba(247,129,102,0.4);color: var(--accent3); }
+  .pill.purple { background: rgba(210,168,255,0.1);border-color: rgba(210,168,255,0.4);color: var(--accent4); }
+  .pill.yellow { background: rgba(227,179,65,0.1); border-color: rgba(227,179,65,0.4); color: var(--yellow); }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 8px 0;
+  }
+
+  .row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+
+  /* ── TITLE SLIDE ── */
+  .title-slide {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  .title-slide .logo {
+    font-size: 64px;
+    margin-bottom: 24px;
+  }
+  .title-slide .main-title {
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+  .title-slide .sub {
+    font-size: 20px;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+  .title-slide .pills { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  /* ── ARCH DIAGRAM ── */
+  .arch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    font-size: 15px;
+    font-family: monospace;
+  }
+  .arch-row { display: flex; gap: 16px; align-items: center; }
+  .arch-box {
+    border: 1px solid;
+    border-radius: 8px;
+    padding: 10px 18px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 15px;
+    min-width: 140px;
+  }
+  .arch-box.blue   { border-color: rgba(88,166,255,0.5); background: rgba(88,166,255,0.08); color: var(--accent); }
+  .arch-box.green  { border-color: rgba(63,185,80,0.5);  background: rgba(63,185,80,0.08);  color: var(--accent2); }
+  .arch-box.purple { border-color: rgba(210,168,255,0.5);background: rgba(210,168,255,0.08);color: var(--accent4); }
+  .arch-box.yellow { border-color: rgba(227,179,65,0.5); background: rgba(227,179,65,0.08); color: var(--yellow); }
+  .arch-box.red    { border-color: rgba(247,129,102,0.5);background: rgba(247,129,102,0.08);color: var(--accent3); }
+  .arch-box small  { display: block; font-weight: 400; font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .arch-arrow { color: var(--muted); font-size: 16px; }
+  .arch-line {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+    margin: 0 auto;
+  }
+
+  /* ── FLOW STEPS ── */
+  .flow { display: flex; flex-direction: column; gap: 6px; }
+  .flow-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 18px;
+  }
+  .flow-step .num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .flow-step .num.blue   { background: rgba(88,166,255,0.2); color: var(--accent); }
+  .flow-step .num.green  { background: rgba(63,185,80,0.2);  color: var(--accent2); }
+  .flow-step .num.yellow { background: rgba(227,179,65,0.2); color: var(--yellow); }
+  .flow-step .num.red    { background: rgba(247,129,102,0.2);color: var(--accent3); }
+
+  /* ── BUG CARD ── */
+  .bug-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent3);
+    border-radius: 0 10px 10px 0;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+  }
+  .bug-card.fixed { border-left-color: var(--accent2); }
+  .bug-card .bug-title { font-weight: 700; font-size: 18px; margin-bottom: 6px; }
+  .bug-card .bug-title .loc { color: var(--muted); font-weight: 400; font-size: 15px; }
+  .bug-card .bug-body { font-size: 17px; color: var(--muted); line-height: 1.6; }
+  .bug-card .fix-row { display: flex; gap: 8px; align-items: baseline; margin-top: 8px; }
+  .bug-card .fix-label { font-size: 14px; color: var(--accent2); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+
+  /* ── ROLE TABLE ── */
+  .role-table { width: 100%; border-collapse: collapse; font-size: 18px; }
+  .role-table th {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .role-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(48,54,61,0.5);
+    vertical-align: top;
+  }
+  .role-table tr:last-child td { border-bottom: none; }
+
+  /* ── TIMELINE ── */
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .tl-item { display: flex; gap: 16px; }
+  .tl-line-wrap { display: flex; flex-direction: column; align-items: center; width: 28px; flex-shrink: 0; }
+  .tl-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  .tl-vert { width: 1px; background: var(--border); flex: 1; min-height: 12px; }
+  .tl-content { padding-bottom: 16px; font-size: 17px; flex: 1; }
+  .tl-time { font-size: 16px; color: var(--muted); margin-bottom: 3px; }
+  .tl-text { color: var(--text); line-height: 1.5; }
+
+  /* big stat */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
+  .stat-box .val { font-size: 30px; font-weight: 800; }
+  .stat-box .lbl { font-size: 14px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+
+  .flex-1 { flex: 1; }
+  .mt-auto { margin-top: auto; }
+  .gap-12 { gap: 12px; }
+
+  /* slide part title */
+  .part-hero {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  .part-hero .part-num {
+    font-size: 80px;
+    font-weight: 900;
+    line-height: 1;
+    opacity: 0.08;
+    position: absolute;
+  }
+  .part-hero .part-content { position: relative; }
+  .part-hero .part-label { font-size: 15px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .part-hero .part-title { font-size: 42px; font-weight: 800; line-height: 1.2; margin-bottom: 16px; }
+  .part-hero .part-sub { font-size: 20px; color: var(--muted); }
+
+  .kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-family: monospace;
+    color: var(--muted);
+  }
+
+  /* highlight row */
+  .hl-row {
+    display: flex; gap: 12px; align-items: stretch; flex: 1;
+  }
+  .hl-row .hl-left { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+  .hl-row .hl-right { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+
+  /* ── DRAGGABLE IMAGE SLIDER ── */
+  .img-slider-wrap {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .img-slider-wrap.dragging { cursor: grabbing; }
+  .img-slider-track {
+    display: flex;
+    height: 100%;
+    transition: transform 0.42s cubic-bezier(0.25,0.46,0.45,0.94);
+    will-change: transform;
+  }
+  .img-slider-track.no-tr { transition: none !important; }
+  .img-slide-item {
+    flex: 0 0 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .img-slide-item img {
+    width: 643px; height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    display: block;
+  }
+  /* CSS placeholder when no real image */
+  .ph-bg {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+  }
+  .ph-bg .ph-icon { font-size: 72px; line-height: 1; filter: drop-shadow(0 4px 16px rgba(0,0,0,0.5)); }
+  .ph-bg .ph-hint {
+    font-size: 12px;
+    color: rgba(255,255,255,0.35);
+    font-style: italic;
+    background: rgba(0,0,0,0.3);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px dashed rgba(255,255,255,0.15);
+  }
+  /* photo overlay grid (makes placeholder feel like a real photo) */
+  .ph-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+  }
+  /* caption overlay */
+  .img-caption {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 36px 20px 60px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.82));
+    pointer-events: none;
+  }
+  .img-caption .cap-tag {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 4px;
+  }
+  .img-caption .cap-title { font-size: 15px; font-weight: 700; line-height: 1.3; }
+  .img-caption .cap-sub   { font-size: 13px; opacity: 0.65; margin-top: 4px; line-height: 1.4; }
+  /* dots */
+  .slider-dots {
+    position: absolute;
+    bottom: 14px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 6px;
+    z-index: 10;
+  }
+  .slider-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    cursor: pointer;
+    transition: all 0.25s;
+    border: none; padding: 0;
+  }
+  .slider-dot.active { background: #fff; transform: scale(1.35); }
+  /* arrows */
+  .slider-arrow {
+    position: absolute;
+    top: 50%; transform: translateY(-50%);
+    background: rgba(0,0,0,0.45);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    font-size: 18px; font-weight: 300;
+    transition: background 0.2s;
+    user-select: none;
+    line-height: 1;
+  }
+  .slider-arrow:hover { background: rgba(0,0,0,0.72); }
+  .slider-arrow.s-prev { left: 10px; }
+  .slider-arrow.s-next { right: 10px; }
+  .slider-arrow:disabled { opacity: 0.25; cursor: default; }
+  /* counter badge top-right */
+  .slider-badge {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.65);
+    z-index: 10;
+    font-family: monospace;
+    pointer-events: none;
+  }
+  /* label top-left */
+  .slider-label-badge {
+    position: absolute;
+    top: 10px; left: 10px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    z-index: 10;
+    pointer-events: none;
+  }
+  /* drag hint animation */
+  @keyframes drag-hint {
+    0%   { transform: translateX(0) translateY(-50%); opacity: 0.7; }
+    30%  { transform: translateX(-12px) translateY(-50%); opacity: 1; }
+    60%  { transform: translateX(8px) translateY(-50%); opacity: 1; }
+    100% { transform: translateX(0) translateY(-50%); opacity: 0; }
+  }
+  .drag-hint {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translateX(0) translateY(-50%);
+    font-size: 28px;
+    pointer-events: none;
+    z-index: 20;
+    animation: drag-hint 2s ease 1.2s 1 forwards;
+    opacity: 0;
+  }
+
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<div id="deck">
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SLIDE 0 – TITLE                                     -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide title-slide active" data-idx="0">
+    <div class="logo">📈</div>
+    <div class="main-title">Lite <span style="color:var(--accent)">Matching</span> Engine</div>
+    <div class="sub">AI Hackathon — System Analysis &amp; Development</div>
+    <div class="pills">
+      <span class="pill blue">Python · FastAPI</span>
+      <span class="pill green">React · Vite</span>
+      <span class="pill purple">FIX 4.4 Protocol</span>
+      <span class="pill yellow">ACB · FPT · VCK</span>
+      <span class="pill red">60 phút</span>
+    </div>
+    <div style="margin-top:48px;font-size:12px;color:var(--muted)">
+      Điều hướng: <span class="kbd">←</span> <span class="kbd">→</span> hoặc nút bên dưới
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- PART 1 COVER                                        -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-idx="1">
+    <div class="part-hero">
+      <div class="part-num">01</div>
+      <div class="part-content">
+        <div class="part-label">Phần 01</div>
+        <div class="part-title">Giới thiệu <span style="color:var(--accent)">Team</span><br>&amp; Hoạt động Pre-Hackathon</div>
+        <div class="part-sub">Phân công vai trò · Tổ chức làm việc · Chiến lược tiếp cận</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SLIDE 1.1 – TEAM ROLES                              -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-idx="2">
+    <div class="slide-label">Phần 01 — Giới thiệu Team</div>
+    <div class="slide-title">Phân công <span class="accent">vai trò</span> trong Team & Chiến lược</div>
+
+    <div class="grid-2">
+      <div class="col">
+        <div class="card" style="flex:1">
+          <h3>Team Structure</h3>
+          <table class="role-table">
+            <thead>
+              <tr>
+                <th>Thành viên</th>
+                <th>Vai trò</th>
+                <th>Trách nhiệm chính</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>ToanTBK</strong></td>
+                <td><span class="tag">Team Leader</span></td>
+                <td>Đào tạo về Framework BMAD, Fix bugs, Test</td>
+              </tr>
+              <tr>
+                <td><strong>SonNH1</strong></td>
+                <td><span class="tag purple">Developer</span></td>
+                <td>Feature Developer, Test</td>
+              </tr>
+              <tr>
+                <td><strong>LinhKTT</strong></td>
+                <td><span class="tag yellow">Tester</span></td>
+                <td>Test end-to-end, Bug hunting </td>
+              </tr>
+			  <tr>
+                <td><strong>ThuyNTT</strong></td>
+                <td><span class="tag green">Coordinator</span></td>
+                <td>Docs, Analyst, Coordinator</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+		
+		<div class="card" style="padding:14px 16px">
+          <h3 class="purple" style="margin-bottom:10px">Chiến lược tiếp cận</h3>
+          <div style="display:flex;flex-direction:column;gap:8px">
+
+            <!-- Con người -->
+            <div style="background:rgba(210,168,255,0.07);border:1px solid rgba(210,168,255,0.25);border-radius:8px;padding:9px 12px">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:7px">
+                <span style="font-size:16px">👥</span>
+                <span style="font-size:11px;font-weight:800;color:var(--accent4);text-transform:uppercase;letter-spacing:1px">Con người</span>
+              </div>
+              <ul class="list" style="font-size:12px;gap:5px">
+                <li>Chọn từ <strong>nhiều team khác nhau</strong> — không cùng background</li>
+                <li><strong>Đa dạng mindset</strong> — Dev · QA · Analyst · Architect</li>
+                <li>Điểm bắt đầu từ số 0 về AI Agent, nỗ lực nạp kiến thức và thử nghiệm</li>
+              </ul>
+            </div>
+
+            <!-- Phương pháp -->
+            <div style="background:rgba(88,166,255,0.07);border:1px solid rgba(88,166,255,0.25);border-radius:8px;padding:9px 12px">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:7px">
+                <span style="font-size:16px">🏗️</span>
+                <span style="font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:1px">Phương pháp — BMAD</span>
+              </div>
+              <ul class="list" style="font-size:12px;gap:5px">
+				<li>Thay đổi cách bạn tiếp cận việc xây dựng phần mềm</li>
+                <li>Ưu điểm: Giúp team không bị lạc hướng "vibe coding". BMAD ép bạn phải viết PRD và kiến trúc hệ thống rõ ràng trước khi code</li> 
+                <li>Sử dụng một quy trình có cấu trúc gồm các giai đoạn: 
+					Analysis (Phân tích) -> Planning (Lập kế hoạch) -> Solutioning (Giải pháp) -> Implementation (Thực thi)
+				</li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        
+		<div class="img-slide-item">
+              <div class="ph-bg" style="background:linear-gradient(135deg, #0f1b3d 0%, #621a6e 50%, #0d1b4a 100%)">
+                <div class="ph-hint"><IMAGE src="images/napo.jpg"></div> 
+              </div>
+              <div class="slider-label-badge">NAPO TEAM</div>
+            </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SLIDE 1.2 – WORKING STYLE & STRATEGY + IMG SLIDER  -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-idx="3">
+    <div class="slide-label">Phần 01 — Pre-Hackathon</div>
+    <div class="slide-title">Hoạt động <span class="accent">Pre-Hackathon</span></div>
+
+    <div style="display:flex;gap:20px;flex:1;min-height:0">
+      <!-- LEFT: timeline + strategy -->
+      <div style="flex:1;display:flex;flex-direction:column;gap:12px;min-height:0;overflow:hidden">
+        <div class="card" style="flex:1;overflow:auto">
+          <h3>Timeline Pre-Hackathon</h3>
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-line-wrap">
+                <div class="tl-dot" style="background:var(--accent)"></div>
+                <div class="tl-vert"></div>
+              </div>
+              <div class="tl-content">
+                <div class="tl-time">Giai đoạn 1 — Thảo luận</div>
+                <div class="tl-text">Phân tích yêu cầu, xác định Framework, hạng mục công việc</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-line-wrap">
+                <div class="tl-dot" style="background:var(--accent2)"></div>
+                <div class="tl-vert"></div>
+              </div>
+              <div class="tl-content">
+                <div class="tl-time">Giai đoạn 2 — Chuẩn bị kiến thức</div>
+                <div class="tl-text">Tìm hiểu về BMAD framework, Claude Code in Action</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-line-wrap">
+                <div class="tl-dot" style="background:var(--yellow)"></div>
+                <div class="tl-vert"></div>
+              </div>
+              <div class="tl-content">
+                <div class="tl-time">Giai đoạn 3 — Chuyên môn hoá</div>
+                <div class="tl-text">Phân công công việc & chuyên môn hóa, dựng project demo</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-line-wrap">
+                <div class="tl-dot" style="background:var(--accent3)"></div>
+                <div class="tl-vert"></div>
+              </div>
+              <div class="tl-content">
+                <div class="tl-time">Giai đoạn 4 — Thử nghiệm và tối ưu</div>
+                <div class="tl-text">Thử nghiệm trên project demo, tối ưu prompts & quy trình, căn chỉnh thời gian</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-line-wrap">
+                <div class="tl-dot" style="background:var(--accent4)"></div>
+              </div>
+              <div class="tl-content">
+                <div class="tl-time">Giai đoạn 5 — Thống nhất chiến lược</div>
+                <div class="tl-text">Thống nhất chiến lược, diễn tập thi thử, chuẩn bị môi trường</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: draggable image slider -->
+      <div style="flex:1;min-height:0;display:flex;flex-direction:column">
+        <!--<div style="font-size:11px;color:var(--muted);margin-bottom:8px;text-align:center;letter-spacing:1px">
+          ✦ KỶ NIỆM PRE-HACKATHON — kéo hoặc nhấn mũi tên để xem ảnh ✦
+        </div>-->
+        <div class="img-slider-wrap" id="img-slider-s4" style="flex:1">
+          <div class="img-slider-track" id="img-slider-s4-track">
+
+            <!-- PHOTO 1: Chứng chỉ học tập -->
+            <div class="img-slide-item">
+              <!-- Replace below div with <img src="path/to/cert.jpg" alt="..."> -->
+              <div class="ph-bg" style="background:linear-gradient(135deg, #0f1b3d 0%, #621a6e 50%, #0d1b4a 100%)">
+                <!--<div class="ph-icon">🎓</div>-->
+                <div class="ph-hint"><IMAGE src="images/cert1.jpg"></div> 
+              </div>
+              <div class="img-caption">
+                <div class="cap-tag" style="color:#58a6ff">01 / Học tập 🎓</div>
+                <div class="cap-title">Chứng chỉ & Khóa học</div>
+                <div class="cap-sub">Thành viên chăm chỉ hoàn thành các khóa học trước ngày thi Hackathon</div>
+              </div>
+              <div class="slider-label-badge">✦ KỶ NIỆM PRE-HACKATHON — kéo hoặc nhấn mũi tên để xem ảnh ✦</div>
+            </div>
+			<!-- PHOTO 1: Chứng chỉ học tập -->
+            <div class="img-slide-item">
+              <!-- Replace below div with <img src="path/to/cert.jpg" alt="..."> -->
+              <div class="ph-bg" style="background:linear-gradient(135deg, #0f1b3d 0%, #621a6e 50%, #0d1b4a 100%)">
+                <!--<div class="ph-icon">🎓</div>-->
+                <div class="ph-hint"><IMAGE src="images/cert2.jpg"></div> 
+              </div>
+              <div class="img-caption">
+                <div class="cap-tag" style="color:#58a6ff">01 / Học tập 🎓</div>
+                <div class="cap-title">Chứng chỉ & Khóa học</div>
+                <div class="cap-sub">Thành viên chăm chỉ hoàn thành các khóa học trước ngày thi Hackathon</div>
+              </div>
+              <div class="slider-label-badge">PRE-HACKATHON</div>
+            </div>
+			<!-- PHOTO 1: Chứng chỉ học tập -->
+            <div class="img-slide-item">
+              <!-- Replace below div with <img src="path/to/cert.jpg" alt="..."> -->
+              <div class="ph-bg" style="background:linear-gradient(135deg, #0f1b3d 0%, #621a6e 50%, #0d1b4a 100%)">
+                <!--<div class="ph-icon">🎓</div>-->
+                <div class="ph-hint"><IMAGE src="images/cert3.jpg"></div> 
+              </div>
+              <div class="img-caption">
+                <div class="cap-tag" style="color:#58a6ff">01 / Học tập 🎓</div>
+                <div class="cap-title">Chứng chỉ & Khóa học</div>
+                <div class="cap-sub">Thành viên chăm chỉ hoàn thành các khóa học trước ngày thi Hackathon</div>
+              </div>
+              <div class="slider-label-badge">PRE-HACKATHON</div>
+            </div>
+
+            <!-- PHOTO 2: Meeting note nửa đêm -->
+            <div class="img-slide-item">
+              <!-- Replace below div with <img src="path/to/meeting.jpg" alt="..."> -->
+              <div class="ph-bg" style="background:linear-gradient(135deg, #0f1b3d 0%, #621a6e 50%, #0d1b4a 100%)">
+                <!--<div class="ph-icon">🌙</div>-->
+                <div class="ph-hint"><IMAGE src="images/meeting_note.jpg"></div>
+              </div>
+              <div class="img-caption">
+                <div class="cap-tag" style="color:#d2a8ff">02 / Planning 🌙</div>
+                <div class="cap-title">Meeting Note đầy đủ</div>
+                <div class="cap-sub">Ghi chép daily meeting</div>
+              </div>
+              <div class="slider-label-badge">PRE-HACKATHON</div>
+            </div>
+
+            <!-- PHOTO 3: Teamwork -->
+            <div class="img-slide-item">
+              <!-- Replace below div with <img src="path/to/team.jpg" alt="..."> -->
+              <div class="ph-bg" style="background:linear-gradient(135deg, #0f1b3d 0%, #621a6e 50%, #0d1b4a 100%)">
+                <!--<div class="ph-icon">🤝</div>-->
+                <div class="ph-hint"><IMAGE src="images/teamwork_online.jpg"></div>
+              </div>
+              <div class="img-caption">
+                <div class="cap-tag" style="color:#3fb950">03 / Teamwork 🤝</div>
+                <div class="cap-title">Brainstorm, test tới nửa đêm</div>
+                <div class="cap-sub">Cả team cùng thảo luận</div>
+              </div>
+              <div class="slider-label-badge">PRE-HACKATHON</div>
+            </div>
+
+            <!-- PHOTO 4: Project setup & test run -->
+            <div class="img-slide-item">
+              <!-- Replace below div with <img src="path/to/setup.jpg" alt="..."> -->
+              <div class="ph-bg" style="background:linear-gradient(135deg, #0f1b3d 0%, #621a6e 50%, #0d1b4a 100%)">
+                <!--<div class="ph-icon">🚀</div>-->
+                <div class="ph-hint"><IMAGE src="images/test.jpg"></div>
+              </div>
+              <div class="img-caption">
+                <div class="cap-tag" style="color:#e3b341">04 / Setup 🚀</div>
+                <div class="cap-title">Dựng Project & Chạy Thử</div>
+                <div class="cap-sub">Dựng môi trường chạy thử</div>
+              </div>
+              <div class="slider-label-badge">PRE-HACKATHON</div>
+            </div>
+			
+			<!-- PHOTO 4: Project setup & test run -->
+            <div class="img-slide-item">
+              <!-- Replace below div with <img src="path/to/setup.jpg" alt="..."> -->
+              <div class="ph-bg" style="background:linear-gradient(135deg, #0f1b3d 0%, #621a6e 50%, #0d1b4a 100%)">
+                <div class="ph-icon"></div>
+                <div class="ph-hint"><IMAGE src="images/anh_vui.jpg"></div>
+              </div>
+              <div class="img-caption">
+                <div class="cap-tag" style="color:#e3b341">04 / Setup 🚀</div>
+                <div class="cap-title">Kỷ niệm có, hoá đơn cũng có</div>
+                <div class="cap-sub">Mỗi người 1 bill :D</div>
+              </div>
+              <div class="slider-label-badge">PRE-HACKATHON</div>
+            </div>
+
+          </div><!-- /track -->
+
+          <!-- Controls -->
+          <button class="slider-arrow s-prev" id="img-slider-s4-prev">&#8249;</button>
+          <button class="slider-arrow s-next" id="img-slider-s4-next">&#8250;</button>
+          <div class="slider-dots"    id="img-slider-s4-dots"></div>
+          <div class="slider-badge"   id="img-slider-s4-badge">1 / 4</div>
+          <div class="drag-hint">👈</div>
+        </div><!-- /slider-wrap -->
+      </div><!-- /right -->
+
+    </div><!-- /flex row -->
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SLIDE 1.3 – BMAD FRAMEWORK + CLAUDE CODE           -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-idx="3b">
+    <div class="slide-label">Phần 01 — Công cụ &amp; Phương pháp</div>
+    <div class="slide-title"><span class="accent">BMAD</span> Framework <span style="color:var(--muted);font-weight:400;font-size:24px">×</span> <span class="green">Claude Code</span></div>
+
+    <div style="display:flex;gap:20px;flex:1;min-height:0">
+
+      <!-- LEFT: BMAD explanation -->
+      <div style="flex:1;display:flex;flex-direction:column;gap:14px;min-height:0">
+
+        <!-- Header card -->
+        <div class="card" style="padding:16px 20px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="font-size:32px">🏗️</div>
+            <div>
+              <div style="font-size:20px;font-weight:800;color:var(--accent)">BMad Method</div>
+              <div style="font-size:18px;color:var(--muted);margin-top:2px"><em>Build More Architect Dreams</em></div>
+            </div>
+            <div style="margin-left:auto">
+              <span class="tag">AI-driven</span>
+              <span class="tag green" style="margin-left:6px">Framework</span>
+            </div>
+          </div>
+          <div style="margin-top:12px;font-size:16px;color:var(--muted);line-height:1.6">
+            Framework quản trị phát triển phần mềm dựa trên AI — không chỉ sửa lỗi nhỏ mà <strong style="color:var(--text)">xây dựng toàn bộ hệ thống</strong> có hệ thống qua 4 lớp và các "agent personas" chuyên biệt.
+          </div>
+        </div>
+
+        <!-- 4 layers -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1">
+          <div style="background:rgba(88,166,255,0.08);border:1px solid rgba(88,166,255,0.25);border-radius:10px;padding:14px 16px">
+            <div style="font-size:20px;margin-bottom:6px">💼</div>
+            <div style="font-size:18px;font-weight:700;color:var(--accent)">B — Business</div>
+            <div style="font-size:16px;color:var(--muted);margin-top:4px;line-height:1.5">Xác định mục tiêu kinh doanh, yêu cầu stakeholder, định nghĩa value proposition</div>
+          </div>
+          <div style="background:rgba(210,168,255,0.08);border:1px solid rgba(210,168,255,0.25);border-radius:10px;padding:14px 16px">
+            <div style="font-size:20px;margin-bottom:6px">🧠</div>
+            <div style="font-size:18px;font-weight:700;color:var(--accent4)">M — Model</div>
+            <div style="font-size:16px;color:var(--muted);margin-top:4px;line-height:1.5">Mô hình hóa domain, data model, business logic, entity relationships</div>
+          </div>
+          <div style="background:rgba(63,185,80,0.08);border:1px solid rgba(63,185,80,0.25);border-radius:10px;padding:14px 16px">
+            <div style="font-size:20px;margin-bottom:6px">🏛️</div>
+            <div style="font-size:18px;font-weight:700;color:var(--accent2)">A — Architecture</div>
+            <div style="font-size:16px;color:var(--muted);margin-top:4px;line-height:1.5">Thiết kế hệ thống, tech stack, component diagram, API contracts</div>
+          </div>
+          <div style="background:rgba(227,179,65,0.08);border:1px solid rgba(227,179,65,0.25);border-radius:10px;padding:14px 16px">
+            <div style="font-size:20px;margin-bottom:6px">🚀</div>
+            <div style="font-size:18px;font-weight:700;color:var(--yellow)">D — Delivery</div>
+            <div style="font-size:16px;color:var(--muted);margin-top:4px;line-height:1.5">Triển khai, CI/CD, testing strategy, monitoring, release plan</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: Agent Personas + Synergy -->
+      <div style="flex:1;display:flex;flex-direction:column;gap:14px;min-height:0">
+
+        <!-- Agent personas -->
+        <div class="card">
+          <h3 class="purple">Agent Personas trong BMAD</h3>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(88,166,255,0.07);border-radius:7px;border:1px solid rgba(88,166,255,0.15)">
+              <span style="font-size:18px">📋</span>
+              <div>
+                <div style="font-size:18px;font-weight:700;color:var(--accent)">Product Owner</div>
+                <div style="font-size:16px;color:var(--muted)">Định nghĩa requirements, user stories, acceptance criteria</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(63,185,80,0.07);border-radius:7px;border:1px solid rgba(63,185,80,0.15)">
+              <span style="font-size:18px">🏗️</span>
+              <div>
+                <div style="font-size:18px;font-weight:700;color:var(--accent2)">Architect</div>
+                <div style="font-size:16px;color:var(--muted)">Thiết kế hệ thống, chọn tech stack, quyết định kiến trúc</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(210,168,255,0.07);border-radius:7px;border:1px solid rgba(210,168,255,0.15)">
+              <span style="font-size:18px">💻</span>
+              <div>
+                <div style="font-size:18px;font-weight:700;color:var(--accent4)">Developer</div>
+                <div style="font-size:16px;color:var(--muted)">Implement code, viết tests, follow architecture decisions</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(247,129,102,0.07);border-radius:7px;border:1px solid rgba(247,129,102,0.15)">
+              <span style="font-size:18px">🔍</span>
+              <div>
+                <div style="font-size:18px;font-weight:700;color:var(--accent3)">QA Engineer</div>
+                <div style="font-size:16px;color:var(--muted)">Test strategy, bug hunting, coverage analysis</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Synergy diagram -->
+        <div class="card" style="flex:1">
+          <h3 class="yellow">Sức mạnh cộng hưởng BMAD × Claude</h3>
+          <div style="display:flex;align-items:center;gap:0;margin:10px 0">
+            <!-- BMAD box -->
+            <div style="flex:1;background:rgba(227,179,65,0.08);border:1px solid rgba(227,179,65,0.3);border-radius:10px;padding:12px;text-align:center">
+              <div style="font-size:22px">🏗️</div>
+              <div style="font-size:18px;font-weight:700;color:var(--yellow);margin-top:4px">BMAD</div>
+              <div style="font-size:17px;color:var(--muted);margin-top:4px;line-height:1.4">Kiến trúc sư &amp; PM<br>Lập kế hoạch<br>Chia nhỏ công việc<br>Định hướng hệ thống</div>
+            </div>
+            <!-- Arrow -->
+            <div style="flex:0 0 44px;text-align:center;font-size:22px;color:var(--muted)">⇄</div>
+            <!-- Claude box -->
+            <div style="flex:1;background:rgba(88,166,255,0.08);border:1px solid rgba(88,166,255,0.3);border-radius:10px;padding:12px;text-align:center">
+              <div style="font-size:22px">🤖</div>
+              <div style="font-size:18px;font-weight:700;color:var(--accent);margin-top:4px">Claude Code</div>
+              <div style="font-size:17px;color:var(--muted);margin-top:4px;line-height:1.4">Công nhân kỹ thuật<br>Viết &amp; review code<br>Fix bugs tức thì<br>Giải thích reasoning</div>
+            </div>
+          </div>
+          <div style="background:rgba(63,185,80,0.07);border:1px solid rgba(63,185,80,0.2);border-radius:8px;padding:10px 14px;font-size:18px;color:var(--accent2);text-align:center;line-height:1.5">
+            ✦ Team dùng BMAD + Claude Code để <strong>plan/execute</strong><br>→ Từ ý tưởng đến hệ thống chạy được trong <strong>60 phút</strong> ✦
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- PART 2 COVER                                        -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-idx="4">
+    <div class="part-hero">
+      <div class="part-num">02</div>
+      <div class="part-content">
+        <div class="part-label">Phần 02</div>
+        <div class="part-title"><span style="color:var(--accent2)">System</span><br>Understanding</div>
+        <div class="part-sub">Kiến trúc · Data Flow · Module Interaction</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SLIDE 2.1 – ARCHITECTURE                            -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-idx="5">
+    <div class="slide-label">Phần 02 — System Understanding</div>
+    <div class="slide-title">Kiến trúc <span class="green">hệ thống</span></div>
+
+    <div class="grid-2">
+      <!-- LEFT: arch diagram -->
+      <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+	  <!--
+        <div class="arch">
+          <div class="arch-row" style="gap:24px">
+            <div class="arch-box blue">Client Terminal<small>React · Port 5173</small></div>
+            <div class="arch-box purple">Admin Panel<small>React · Port 3001</small></div>
+          </div>
+          <div style="display:flex;gap:80px;height:28px;align-items:center">
+            <div style="width:1px;height:100%;background:var(--border);margin-left:70px"></div>
+            <div style="width:1px;height:100%;background:var(--border);margin-right:70px"></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div style="font-size:11px;color:var(--muted)">REST + WebSocket</div>
+          </div>
+          <div class="arch-line" style="height:16px"></div>
+          <div class="arch-box green" style="width:320px">
+            FastAPI Engine · Port 8000
+            <small>REST Router · WS Endpoints · AppState Singleton</small>
+          </div>
+          <div class="arch-line" style="height:12px"></div>
+          <div class="arch-row" style="gap:16px">
+            <div class="arch-box yellow">OrderBook[ACB]<small>SortedDict</small></div>
+            <div class="arch-box yellow">OrderBook[FPT]<small>SortedDict</small></div>
+            <div class="arch-box yellow">OrderBook[VCK]<small>SortedDict</small></div>
+          </div>
+          <div class="arch-line" style="height:12px"></div>
+          <div class="arch-box red">FIX TCP Server · Port 9876<small>asyncio · FIXClientHandler</small></div>
+        </div>-->
+		
+		<div class="svg-wrap">
+<svg viewBox="0 0 920 700" width="100%" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="a"  markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#484f58"/></marker>
+  <marker id="ab" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#388bfd"/></marker>
+  <marker id="ag" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#3fb950"/></marker>
+  <marker id="ap" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#8957e5"/></marker>
+  <marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#f85149"/></marker>
+  <marker id="at" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#39d0d8"/></marker>
+  <marker id="ao" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#d29922"/></marker>
+  <filter id="gvck">
+    <feGaussianBlur stdDeviation="3" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+</defs>
+
+<!-- ══════════════════════════════════════════
+     ROW 0 — End Users (merged) + Admin
+════════════════════════════════════════════ -->
+
+<!-- End Users (Nhà đầu tư lẻ + Tổ chức/Bot) — merged -->
+<rect x="120" y="18" width="230" height="68" rx="8" fill="#0d2544" stroke="#388bfd" stroke-width="1.5"/>
+<text x="235" y="42" text-anchor="middle" font-size="13" font-weight="700" fill="#79c0ff">👤 Nhà đầu tư / Tổ chức</text>
+<text x="235" y="58" text-anchor="middle" font-size="10" fill="#8b949e">Retail Investor · Institutional · Algo Bot</text>
+<text x="235" y="72" text-anchor="middle" font-size="10" fill="#8b949e">Browser / Desktop App / Trading System</text>
+
+<!-- Admin User -->
+<rect x="570" y="18" width="230" height="68" rx="8" fill="#1a0e2b" stroke="#8957e5" stroke-width="1.5"/>
+<text x="685" y="42" text-anchor="middle" font-size="13" font-weight="700" fill="#bc8cff">🛡 Quản trị viên</text>
+<text x="685" y="58" text-anchor="middle" font-size="10" fill="#8b949e">Admin / Operator</text>
+<text x="685" y="72" text-anchor="middle" font-size="10" fill="#8b949e">Market Control · Configuration</text>
+
+<!-- User → UI arrows -->
+<line x1="235" y1="86" x2="235" y2="148" stroke="#388bfd" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ab)"/>
+<line x1="685" y1="86" x2="685" y2="148" stroke="#8957e5" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ap)"/>
+
+<!-- ══════════════════════════════════════════
+     ROW 1 — UI Layer
+════════════════════════════════════════════ -->
+
+<!-- Client Terminal :5173 -->
+<rect x="80" y="150" width="310" height="76" rx="8" fill="#0d2544" stroke="#388bfd" stroke-width="1.5"/>
+<text x="235" y="174" text-anchor="middle" font-size="12" font-weight="700" fill="#79c0ff">Client Terminal</text>
+<text x="235" y="190" text-anchor="middle" font-size="10" fill="#8b949e">React + Vite · Giao diện đặt lệnh</text>
+<rect x="166" y="200" width="138" height="18" rx="4" fill="#1f3a5f"/>
+<text x="235" y="213" text-anchor="middle" font-size="11" font-weight="700" fill="#58a6ff">Đặt lệnh, xem order book, theo dõi trade feed real-time</text>
+
+<!-- Admin Panel :3001 -->
+<rect x="530" y="150" width="310" height="76" rx="8" fill="#1a0e2b" stroke="#8957e5" stroke-width="1.5"/>
+<text x="685" y="174" text-anchor="middle" font-size="12" font-weight="700" fill="#bc8cff">Admin Panel</text>
+<text x="685" y="190" text-anchor="middle" font-size="10" fill="#8b949e">React + Vite · Quản lý thị trường</text>
+<rect x="616" y="200" width="138" height="18" rx="4" fill="#2a1a4a"/>
+<text x="685" y="213" text-anchor="middle" font-size="11" font-weight="700" fill="#8957e5">Mở/đóng phiên, chỉnh stock config, xem logs và số client</text>
+
+<!-- ══════════════════════════════════════════
+     ROW 2 — FIX TCP Server + FastAPI Engine
+════════════════════════════════════════════ -->
+
+<!-- FIX TCP Server :9876 -->
+<rect x="80" y="306" width="310" height="82" rx="8" fill="#2b0e0e" stroke="#f85149" stroke-width="1.5"/>
+<text x="235" y="330" text-anchor="middle" font-size="13" font-weight="700" fill="#ff7b72">FIX TCP Server </text>
+<text x="235" y="348" text-anchor="middle" font-size="10" fill="#8b949e">Nhận lệnh từ Client Terminal</text>
+<!--<text x="235" y="348" text-anchor="middle" font-size="10" fill="#8b949e">asyncio · FIXClientHandler · simplefix</text>
+<text x="235" y="364" text-anchor="middle" font-size="10" fill="#f85149">NewOrderSingle (D) · ExecutionReport (8)</text>
+<text x="235" y="380" text-anchor="middle" font-size="9" fill="#8b949e">Heartbeat · Sequence numbers · per-conn session</text>-->
+
+<!-- FastAPI Engine :8000 -->
+<rect x="530" y="306" width="310" height="82" rx="10" fill="#0d2b14" stroke="#3fb950" stroke-width="2"/>
+<text x="685" y="330" text-anchor="middle" font-size="13" font-weight="700" fill="#56d364">⚡ FASTAPI Engine</text>
+<text x="685" y="348" text-anchor="middle" font-size="10" fill="#8b949e">REST Router · AppState Singleton · match_order()</text>
+<text x="685" y="364" text-anchor="middle" font-size="10" fill="#3fb950">Gateway nhận REST + WebSocket, validate input, điều phối matching</text>
+<text x="553" y="380" font-size="9" fill="#3fb950">POST /api/orders</text>
+<text x="660" y="380" font-size="9" fill="#3fb950">WS /ws/market-data</text>
+<text x="765" y="380" font-size="9" fill="#3fb950">WS /ws/admin</text>
+
+<!-- ── Client Terminal → FIX TCP (FIX 4.4 order submission) ── -->
+<line x1="235" y1="226" x2="235" y2="304" stroke="#f85149" stroke-width="2" marker-end="url(#ar)"/>
+<text x="243" y="262" font-size="9" fill="#f85149">FIX 4.4 Protocol</text>
+
+<!-- Engine → Client via WS :8765 (market data broadcast) -->
+<path d="M 160 304 Q 120 272 112 226" stroke="#39d0d8" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#at)"/>
+<text x="95" y="270" font-size="9" fill="#39d0d8" text-anchor="end">client ws://:8765</text>
+<text x="95" y="282" font-size="9" fill="#39d0d8" text-anchor="end">market-data</text>
+
+<!-- FIX → Engine (same event loop, internal call) -->
+<line x1="392" y1="338" x2="528" y2="338" stroke="#f85149" stroke-width="1.5" marker-end="url(#ar)"/>
+<text x="460" y="330" text-anchor="middle" font-size="9" fill="#f85149">match_order()</text>
+<line x1="528" y1="356" x2="392" y2="356" stroke="#f85149" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#ar)"/>
+<!--<text x="460" y="372" text-anchor="middle" font-size="9" fill="#f85149">ExecutionReport(8)</text>-->
+
+<!-- Admin → Engine REST -->
+<path d="M 720 226 Q 740 268 742 304" stroke="#8957e5" stroke-width="1.5" fill="none" marker-end="url(#ap)"/>
+<text x="748" y="268" font-size="9" fill="#8957e5">REST /api/*</text>
+
+<!-- Engine → Admin WS -->
+<path d="M 688 304 Q 680 268 650 226" stroke="#3fb950" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#ag)"/>
+<text x="614" y="270" font-size="9" fill="#3fb950">ws://:8000/ws/admin</text>
+
+<!-- Engine broadcasts market data to FIX clients (via FIX server relay) -->
+<path d="M 592 388 Q 480 400 390 388" stroke="#39d0d8" stroke-width="1.2" fill="none" stroke-dasharray="3,3" marker-end="url(#at)"/>
+<text x="490" y="400" text-anchor="middle" font-size="8" fill="#39d0d8">broadcast trade result</text>
+
+<!-- ══════════════════════════════════════════
+     ROW 3 — Order Books
+════════════════════════════════════════════ -->
+<rect x="60"  y="462" width="158" height="76" rx="8" fill="#2b1d0e" stroke="#d29922" stroke-width="1.5"/>
+<text x="139" y="486" text-anchor="middle" font-size="12" font-weight="700" fill="#e3b341">OrderBook[ACB]</text>
+<text x="139" y="502" text-anchor="middle" font-size="10" fill="#8b949e">SortedDict</text>
+<text x="139" y="518" text-anchor="middle" font-size="10" fill="#8b949e">Bids(neg) · Asks(pos)</text>
+<text x="139" y="532" text-anchor="middle" font-size="9" fill="#d29922">FIFO per price level</text>
+
+<rect x="381" y="462" width="158" height="76" rx="8" fill="#2b1d0e" stroke="#d29922" stroke-width="1.5"/>
+<text x="460" y="486" text-anchor="middle" font-size="12" font-weight="700" fill="#e3b341">OrderBook[FPT]</text>
+<text x="460" y="502" text-anchor="middle" font-size="10" fill="#8b949e">SortedDict</text>
+<text x="460" y="518" text-anchor="middle" font-size="10" fill="#8b949e">Bids(neg) · Asks(pos)</text>
+<text x="460" y="532" text-anchor="middle" font-size="9" fill="#d29922">FIFO per price level</text>
+
+<!-- VCK highlighted -->
+<rect x="702" y="452" width="168" height="96" rx="8" fill="#0b2429" stroke="#39d0d8" stroke-width="2.5" filter="url(#gvck)"/>
+<text x="786" y="476" text-anchor="middle" font-size="13" font-weight="700" fill="#56d4db">OrderBook[VCK]</text>
+<text x="786" y="502" text-anchor="middle" font-size="10" fill="#8b949e">SortedDict</text>
+<text x="786" y="518" text-anchor="middle" font-size="10" fill="#8b949e">Bids(neg) · Asks(pos)</text>
+<text x="786" y="532" text-anchor="middle" font-size="9" fill="#d29922">FIFO per price level</text>
+
+<!-- Engine → OrderBooks -->
+<path d="M 620 388 Q 500 424 140 460" stroke="#d29922" stroke-width="1.3" fill="none" marker-end="url(#ao)"/>
+<path d="M 660 388 Q 580 424 462 460" stroke="#d29922" stroke-width="1.3" fill="none" marker-end="url(#ao)"/>
+<path d="M 750 388 L 786 450" stroke="#39d0d8" stroke-width="2" fill="none" marker-end="url(#at)"/>
+
+<!-- ══════════════════════════════════════════
+     ROW 4 — Trade History & Broadcast
+════════════════════════════════════════════ -->
+<rect x="246" y="614" width="428" height="66" rx="8" fill="#161b22" stroke="#484f58" stroke-width="1.5"/>
+<text x="460" y="637" text-anchor="middle" font-size="12" font-weight="700" fill="#e6edf3">Trade History + WS Broadcast</text>
+<text x="460" y="654" text-anchor="middle" font-size="10" fill="#8b949e">Sequenced · Deterministic · Fills both sides (buyer + seller)</text>
+<text x="460" y="670" text-anchor="middle" font-size="10" fill="#3fb950">Trade(VCK, 12000, qty=200) → pushed to all WS subscribers</text>
+
+<!-- OrderBooks → Trade -->
+<path d="M 139 538 Q 138 578 244 622" stroke="#484f58" stroke-width="1.2" stroke-dasharray="3,3" fill="none" marker-end="url(#a)"/>
+<path d="M 460 538 L 460 612" stroke="#484f58" stroke-width="1.2" stroke-dasharray="3,3" fill="none" marker-end="url(#a)"/>
+<path d="M 786 548 Q 760 584 676 624" stroke="#39d0d8" stroke-width="1.5" stroke-dasharray="3,3" fill="none" marker-end="url(#at)"/>
+
+<!-- ══ Step circles ══ -->
+<circle cx="100" cy="168" r="9" fill="#1f6feb"/>
+<text x="100" y="172" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">2</text>
+
+<circle cx="558" cy="168" r="9" fill="#8957e5"/>
+<text x="558" y="172" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">1</text>
+
+<circle cx="100" cy="325" r="9" fill="#f85149"/>
+<text x="100" y="329" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">3</text>
+
+<circle cx="540" cy="325" r="9" fill="#3fb950"/>
+<text x="540" y="329" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">4</text>
+
+<circle cx="707" cy="470" r="9" fill="#39d0d8"/>
+<text x="707" y="474" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">5</text>
+
+<circle cx="460" cy="618" r="9" fill="#484f58"/>
+<text x="460" y="622" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">6</text>
+
+<!-- ══ Legend ══ -->
+<rect x="30" y="614" width="200" height="82" rx="6" fill="#161b22" stroke="#21262d"/>
+<text x="130" y="632" text-anchor="middle" font-size="10" font-weight="700" fill="#8b949e">Chú thích</text>
+<line x1="42" y1="644" x2="72" y2="644" stroke="#f85149" stroke-width="2" marker-end="url(#ar)"/>
+<text x="78" y="648" font-size="9" fill="#ff7b72">FIX 4.4 (order submit)</text>
+<line x1="42" y1="660" x2="72" y2="660" stroke="#39d0d8" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#at)"/>
+<text x="78" y="664" font-size="9" fill="#56d4db">WS push / broadcast</text>
+<line x1="42" y1="676" x2="72" y2="676" stroke="#8957e5" stroke-width="1.5" marker-end="url(#ap)"/>
+<text x="78" y="680" font-size="9" fill="#bc8cff">REST /api/*</text>
+<line x1="42" y1="692" x2="72" y2="692" stroke="#d29922" stroke-width="1.5" marker-end="url(#ao)"/>
+<text x="78" y="696" font-size="9" fill="#e3b341">match_order() call</text>
+
+</svg>
+</div>
+      </div>
+
+      <!-- RIGHT: key facts -->
+      <div class="col" style="gap: 10px;">
+		<div class="card" style="padding:14px 16px">
+          <h3 class="yellow" style="margin-bottom:10px">FIX 4.4 Protocol - Financial Information eXchange</h3>
+          <div style="display:flex;flex-direction:column;gap:6px">
+			<div style="display:flex;gap:10px;align-items:flex-start">
+              <span style="font-size:16px;flex-shrink:0">🔧</span>
+              <div style="font-size:13px"><strong style="color:var(--accent4)">Cấu trúc gói tin</strong> — Mỗi trường là một cặp <code>Tag=Value</code> ngăn cách bởi ký tự <code>SOH</code> (hiển thị là <code style="color:var(--accent3)">|</code>)</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <span style="font-size:16px;flex-shrink:0">⚡</span>
+              <div style="font-size:13px"><strong style="color:var(--yellow)">Tốc độ microsecond</strong> — Text thuần, không overhead, parse trong vài µs</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <span style="font-size:16px;flex-shrink:0">🔒</span>
+              <div style="font-size:13px"><strong style="color:var(--accent2)">Không mất lệnh</strong> — SeqNum + ResendRequest đảm bảo toàn vẹn dữ liệu</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <span style="font-size:16px;flex-shrink:0">🌍</span>
+              <div style="font-size:13px"><strong style="color:var(--accent)">Ngôn ngữ chung</strong> — NYSE, NASDAQ, HKEX, HOSE, HNX đều dùng → tích hợp dễ dàng</div>
+            </div>
+            
+          </div>
+        </div>
+		
+		<div class="col">
+    <div class="card" style="padding:14px 16px">
+        <h3 style="color:var(--accent4);margin-bottom:10px">🚀 FastAPI Gateway</h3>
+        <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">📥</span>
+                <div style="font-size:13px"><strong style="color:var(--accent4)">Tiếp nhận</strong> — Nhận lệnh từ Client UI qua endpoint <code style="color:var(--accent3)">POST /api/orders</code></div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">📡</span>
+                <div style="font-size:13px"><strong style="color:var(--accent4)">Broadcast</strong> — Duy trì kết nối <code>WebSocket</code> để đẩy dữ liệu TradeFeed lên bảng điện tử</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">🛡️</span>
+                <div style="font-size:13px"><strong style="color:var(--accent4)">Trung chuyển</strong> — Xác thực tính hợp lệ sơ bộ trước khi đẩy lệnh vào lõi xử lý</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="padding:14px 16px">
+        <h3 style="color:var(--accent2);margin-bottom:10px">⚙️ Matching Engine</h3>
+        <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">⚔️</span>
+                <div style="font-size:13px"><strong style="color:var(--accent2)">Đối ứng</strong> — So khớp <code>Bids/Asks</code> liên tục dựa trên thuật toán ưu tiên Giá và Thời gian</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">⚡</span>
+                <div style="font-size:13px"><strong style="color:var(--accent2)">Tốc độ</strong> — Xử lý <code>In-Memory</code> trên RAM giúp đạt hiệu năng khớp lệnh micro giây</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">💎</span>
+                <div style="font-size:13px"><strong style="color:var(--accent2)">Khớp lệnh</strong> — Tạo giao dịch (Trade), cập nhật số dư và thông báo cho Broadcast</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="padding:14px 16px">
+        <h3 style="color:var(--accent);margin-bottom:10px">📊 OrderBook</h3>
+        <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">🗂️</span>
+                <div style="font-size:13px"><strong style="color:var(--accent)">Cấu trúc</strong> — Sử dụng <code>SortedDict</code> để tự động sắp xếp hàng đợi lệnh chờ khớp</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">🔄</span>
+                <div style="font-size:13px"><strong style="color:var(--accent)">Ưu tiên</strong> — Áp dụng Key âm cho Mua và Key dương cho Bán để tối ưu tốc độ tìm kiếm</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">⏳</span>
+                <div style="font-size:13px"><strong style="color:var(--accent)">FIFO</strong> — Đảm bảo tính công bằng: lệnh đến trước tại cùng mức giá sẽ được ưu tiên trước</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="padding:14px 16px">
+        <h3 class="yellow" style="margin-bottom:10px">🔌 FIX Server (9876)</h3>
+        <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">🏗️</span>
+                <div style="font-size:13px"><strong style="color:var(--yellow)">Kết nối</strong> — TCP Native chuyên dụng cho Algo-trading bot và các tổ chức bên ngoài</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">🔄</span>
+                <div style="font-size:13px"><strong style="color:var(--yellow)">Đồng bộ</strong> — Chạy chung <code>Event Loop</code> với FastAPI đảm bảo dữ liệu luôn tuần tự</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="font-size:16px;flex-shrink:0">✉️</span>
+                <div style="font-size:13px"><strong style="color:var(--yellow)">Giải mã</strong> — Chuyển đổi bản tin <code>Tag=Value</code> trực tiếp vào RAM chỉ sau vài µs</div>
+            </div>
+        </div>
+    </div>
+</div>
+		
+        <!--<div class="card">
+          <h3 class="yellow">Tech Stack</h3>
+          <div class="row" style="gap:8px">
+            <span class="tag">Python 3.14</span>
+            <span class="tag">FastAPI</span>
+            <span class="tag">Uvicorn</span>
+            <span class="tag">simplefix</span>
+            <span class="tag">SortedDict</span>
+            <span class="tag green">React</span>
+            <span class="tag green">Vite 6</span>
+            <span class="tag purple">WebSocket</span>
+            <span class="tag yellow">FIX 4.4</span>
+          </div>
+        </div>
+        <div class="card">
+          <h3 class="purple">3 Supported Symbols</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:4px">
+            <div style="text-align:center;padding:8px;background:rgba(88,166,255,0.08);border-radius:8px;border:1px solid rgba(88,166,255,0.2)">
+              <div style="font-weight:700;font-size:16px;color:var(--accent)">ACB</div>
+            </div>
+            <div style="text-align:center;padding:8px;background:rgba(63,185,80,0.08);border-radius:8px;border:1px solid rgba(63,185,80,0.2)">
+              <div style="font-weight:700;font-size:16px;color:var(--accent2)">FPT</div>
+            </div>
+            <div style="text-align:center;padding:8px;background:rgba(210,168,255,0.08);border-radius:8px;border:1px solid rgba(210,168,255,0.2)">
+              <div style="font-weight:700;font-size:16px;color:var(--accent4)">VCK</div>
+            </div>
+          </div>
+        </div> -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SLIDE 2.2 – DATA FLOW                               -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-idx="6">
+    <div class="slide-label">Phần 02 — System Understanding</div>
+    <div class="slide-title">Luồng <span class="green">hoạt động</span></div>
+
+      <div style="display:flex;gap:16px;flex:1;min-height:0">
+
+      <!-- COL 1: Config + Order Book states -->
+      <div style="flex:0 0 210px;display:flex;flex-direction:column;gap:10px">
+
+        <!-- VCK Config card -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:8px">⚙ Stock Config</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:18px;font-weight:900;color:var(--accent4)">VCK</span>
+            <span style="background:rgba(63,185,80,0.15);border:1px solid rgba(63,185,80,0.4);color:var(--accent2);border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700">● OPEN</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:11px">
+            <div style="background:rgba(247,129,102,0.08);border-radius:5px;padding:5px 7px">
+              <div style="color:var(--muted);font-size:9px">Floor</div>
+              <div style="color:var(--accent3);font-weight:700">10,000</div>
+            </div>
+            <div style="background:rgba(88,166,255,0.08);border-radius:5px;padding:5px 7px">
+              <div style="color:var(--muted);font-size:9px">Ceiling</div>
+              <div style="color:var(--accent);font-weight:700">15,000</div>
+            </div>
+            <div style="background:rgba(227,179,65,0.08);border-radius:5px;padding:5px 7px">
+              <div style="color:var(--muted);font-size:9px">Price Step</div>
+              <div style="color:var(--yellow);font-weight:700">100</div>
+            </div>
+            <div style="background:rgba(227,179,65,0.08);border-radius:5px;padding:5px 7px">
+              <div style="color:var(--muted);font-size:9px">Qty Step</div>
+              <div style="color:var(--yellow);font-weight:700">100</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Book BEFORE match -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 13px">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:7px">📖 Order Book — Trước khớp</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;font-size:10px;text-align:center;margin-bottom:4px">
+            <div style="color:var(--muted)">Bid Qty</div><div style="color:var(--muted)">Bid Price</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;font-size:11px;text-align:center">
+            <div style="background:rgba(63,185,80,0.12);border-radius:4px;padding:4px;color:var(--accent2);font-weight:700">200</div>
+            <div style="background:rgba(63,185,80,0.12);border-radius:4px;padding:4px;color:var(--accent2);font-weight:700">12,000</div>
+          </div>
+          <div style="text-align:center;color:var(--muted);font-size:9px;margin:4px 0">— spread —</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;font-size:10px;text-align:center;margin-bottom:4px">
+            <div style="color:var(--muted)">Ask Price</div><div style="color:var(--muted)">Ask Qty</div>
+          </div>
+          <div style="text-align:center;font-size:10px;color:var(--muted);font-style:italic">empty — chờ seller</div>
+        </div>
+
+        <!-- Order Book AFTER match -->
+        <div style="background:var(--surface);border:1px solid rgba(63,185,80,0.4);border-radius:10px;padding:11px 13px">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent2);margin-bottom:7px">✓ Order Book — Sau khớp</div>
+          <div style="text-align:center;padding:14px 0;color:var(--muted);font-size:11px;font-style:italic">
+            Cả hai lệnh đã<br><strong style="color:var(--accent2)">FILLED</strong><br>Sổ lệnh trống
+          </div>
+        </div>
+
+      </div>
+
+      <!-- COL 2: Main flow diagram -->
+      <div style="flex:1;display:flex;flex-direction:column;gap:8px;justify-content:center">
+        <!-- Phase label -->
+        <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:2px">Luồng thời gian thực — VCK BUY 200 @ 12,000</div>
+
+		<!-- Step 2 -->
+        <div style="display:flex;gap:8px;align-items:stretch">
+          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+            <div style="width:22px;height:22px;border-radius:50%;background:var(--accent4);color:#0d1117;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center">1</div>
+            <div style="width:1px;flex:1;background:var(--border);margin:2px 0"></div>
+          </div>
+          <div style="background:rgba(210,168,255,0.05);border:1px solid rgba(210,168,255,0.2);border-radius:8px;padding:6px 11px;flex:1;margin-bottom:3px">
+            <div style="font-size:15px;font-weight:700;color:var(--accent4)">Admin Panel giám sát</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:2px">Kết nối <code>ws://8000/ws/admin</code> — start market, xem sổ lệnh & logs realtime</div>
+          </div>
+        </div>
+		
+        <!-- Step 1 -->
+        <div style="display:flex;gap:8px;align-items:stretch">
+          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+            <div style="width:22px;height:22px;border-radius:50%;background:var(--accent4);color:#0d1117;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center">2</div>
+            <div style="width:1px;flex:1;background:var(--border);margin:2px 0"></div>
+          </div>
+          <div style="background:rgba(210,168,255,0.07);border:1px solid rgba(210,168,255,0.25);border-radius:8px;padding:6px 11px;flex:1;margin-bottom:3px">
+            <div style="font-size:15px;font-weight:700;color:var(--accent4)">Client gửi lệnh — FIX 4.4 Protocol</div>
+            <div style="font-family:monospace;font-size:10px;color:var(--muted);margin-top:3px;background:#0a0e14;border-radius:4px;padding:3px 7px;line-height:1.7">
+              <span style="color:var(--accent4)">35=D</span> | <span style="color:var(--accent2)">55=VCK</span> | <span style="color:var(--yellow)">54=1(BUY)</span> | <span style="color:var(--accent3)">44=12000</span> | <span style="color:var(--accent)">38=200</span> | <span style="color:var(--muted)">40=2(LIMIT)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div style="display:flex;gap:8px;align-items:stretch">
+          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+            <div style="width:22px;height:22px;border-radius:50%;background:#f85149;color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center">3</div>
+            <div style="width:1px;flex:1;background:var(--border);margin:2px 0"></div>
+          </div>
+          <div style="background:rgba(248,81,73,0.06);border:1px solid rgba(248,81,73,0.25);border-radius:8px;padding:6px 11px;flex:1;margin-bottom:3px">
+            <div style="font-size:15px;font-weight:700;color:#ff7b72">FIX TCP Server nhận lệnh <code style="font-size:11px"></code></div>
+            <div style="font-size:13px;color:var(--muted);margin-top:2px">Parse gói tin · kiểm tra Logon · MsgSeqNum · chuyển <code>match_order()</code></div>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div style="display:flex;gap:8px;align-items:stretch">
+          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+            <div style="width:22px;height:22px;border-radius:50%;background:var(--accent);color:#0d1117;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center">4</div>
+            <div style="width:1px;flex:1;background:var(--border);margin:2px 0"></div>
+          </div>
+          <div style="background:rgba(88,166,255,0.07);border:1px solid rgba(88,166,255,0.25);border-radius:8px;padding:6px 11px;flex:1;margin-bottom:3px">
+            <div style="font-size:15px;font-weight:700;color:var(--accent)">Engine Validate</div>
+            <div style="display:flex;gap:5px;margin-top:4px;flex-wrap:wrap">
+              <span style="font-size:12px;background:rgba(63,185,80,0.12);border:1px solid rgba(63,185,80,0.3);color:var(--accent2);border-radius:4px;padding:1px 6px">✓ Market OPEN</span>
+              <span style="font-size:12px;background:rgba(63,185,80,0.12);border:1px solid rgba(63,185,80,0.3);color:var(--accent2);border-radius:4px;padding:1px 6px">✓ 10,000 ≤ 12,000 ≤ 15,000</span>
+              <span style="font-size:12px;background:rgba(63,185,80,0.12);border:1px solid rgba(63,185,80,0.3);color:var(--accent2);border-radius:4px;padding:1px 6px">✓ 12,000 % 100 = 0</span>
+              <span style="font-size:12px;background:rgba(63,185,80,0.12);border:1px solid rgba(63,185,80,0.3);color:var(--accent2);border-radius:4px;padding:1px 6px">✓ 200 % 100 = 0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div style="display:flex;gap:8px;align-items:stretch">
+          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+            <div style="width:22px;height:22px;border-radius:50%;background:var(--yellow);color:#0d1117;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center">5</div>
+            <div style="width:1px;flex:1;background:var(--border);margin:2px 0"></div>
+          </div>
+          <div style="background:rgba(227,179,65,0.07);border:1px solid rgba(227,179,65,0.25);border-radius:8px;padding:6px 11px;flex:1;margin-bottom:3px">
+            <div style="font-size:15px;font-weight:700;color:var(--yellow)">OrderBook — Lệnh vào Bid side (NEW)</div>
+            <div style="font-family:monospace;font-size:11px;background:#0a0e14;border-radius:4px;padding:3px 7px;margin-top:3px;color:var(--yellow)">BUY LIMIT VCK qty=200 price=12000 → <strong>NEW</strong> · chờ đối ứng</div>
+          </div>
+        </div>
+
+        <!-- Step 6 -->
+        <div style="display:flex;gap:8px;align-items:stretch">
+          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+            <div style="width:22px;height:22px;border-radius:50%;background:var(--accent3);color:#0d1117;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center">6</div>
+            <div style="width:1px;flex:1;background:var(--border);margin:2px 0"></div>
+          </div>
+          <div style="background:rgba(247,129,102,0.07);border:1px solid rgba(247,129,102,0.25);border-radius:8px;padding:6px 11px;flex:1;margin-bottom:3px">
+            <div style="font-size:15px;font-weight:700;color:var(--accent3)">Seller đặt lệnh đối ứng</div>
+            <div style="font-family:monospace;font-size:11px;background:#0a0e14;border-radius:4px;padding:3px 7px;margin-top:3px;color:var(--accent3)">SELL LIMIT VCK qty=200 price=12000 → matching...</div>
+          </div>
+        </div>
+
+        <!-- Step 7 -->
+        <div style="display:flex;gap:8px;align-items:stretch">
+          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+            <div style="width:22px;height:22px;border-radius:50%;background:var(--accent2);color:#0d1117;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center">7</div>
+            <div style="width:1px;flex:1;background:var(--border);margin:2px 0"></div>
+          </div>
+          <div style="background:rgba(63,185,80,0.1);border:2px solid rgba(63,185,80,0.5);border-radius:8px;padding:6px 11px;flex:1;margin-bottom:3px">
+            <div style="font-size:15px;font-weight:800;color:var(--accent2)">⚡ MATCH! — Khớp lệnh thành công</div>
+            <div style="display:flex;gap:6px;margin-top:5px">
+              <div style="flex:1;text-align:center;background:rgba(0,0,0,0.3);border-radius:5px;padding:4px">
+                <div style="color:var(--muted);font-size:9px">BUY</div><div style="font-weight:700;color:var(--accent2);font-size:13px">FILLED ✓</div>
+              </div>
+              <div style="display:flex;align-items:center;color:var(--accent2)">×</div>
+              <div style="flex:1;text-align:center;background:rgba(0,0,0,0.3);border-radius:5px;padding:4px">
+                <div style="color:var(--muted);font-size:9px">SELL</div><div style="font-weight:700;color:var(--accent2);font-size:13px">FILLED ✓</div>
+              </div>
+              <div style="display:flex;align-items:center;color:var(--accent2)">=</div>
+              <div style="flex:1.5;text-align:center;background:rgba(63,185,80,0.15);border:1px solid rgba(63,185,80,0.4);border-radius:5px;padding:4px">
+                <div style="color:var(--muted);font-size:9px">TRADE</div><div style="font-weight:700;color:var(--accent2);font-size:13px">VCK 12,000×200</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 8 -->
+        <div style="display:flex;gap:8px;align-items:stretch">
+          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+            <div style="width:22px;height:22px;border-radius:50%;background:var(--accent);color:#0d1117;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center">8</div>
+          </div>
+          <div style="background:rgba(88,166,255,0.07);border:1px solid rgba(88,166,255,0.25);border-radius:8px;padding:6px 11px;flex:1">
+            <div style="font-size:15px;font-weight:700;color:var(--accent)">Broadcast kết quả</div>
+            <div style="display:flex;gap:4px;margin-top:4px;flex-direction:column;font-size:12px">
+              <div><span style="color:var(--accent4)">→</span> <code style="font-size:11px">ws://8765</code> <span style="color:var(--muted)">book_update + trade → Client Terminal</span></div>
+              <div><span style="color:var(--accent2)">→</span> <code style="font-size:11px">ws://8000/ws/admin</code> <span style="color:var(--muted)">log + Trade History → Admin Panel</span></div>
+              <div><span style="color:var(--accent3)">→</span> <code style="font-size:11px">ExecutionReport(8)</code> <span style="color:var(--muted)">ExecType=2 FILLED → FIX client</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- COL 3: Logs + broadcast -->
+      <div style="flex:0 0 230px;display:flex;flex-direction:column;gap:10px">
+
+        <!-- Comm Logs -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 13px;flex:1">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:8px">📋 Communication Logs</div>
+          <div style="font-family:'Consolas',monospace;font-size:10px;display:flex;flex-direction:column;gap:4px">
+            <div style="color:var(--muted)">Uvicorn running on :8000</div>
+            <div style="color:var(--muted)">FIX listening on :9876</div>
+            <div><span style="color:var(--accent2)">→</span> <span style="color:var(--muted)">WS /ws/admin accepted</span></div>
+            <div><span style="color:var(--accent2)">→</span> <span style="color:var(--muted)">WS :8765 accepted</span></div>
+            <div style="border-top:1px solid var(--border);padding-top:4px;margin-top:2px"></div>
+            <div><span style="color:var(--accent2)">IN</span> <span style="color:var(--muted)">[REST]</span> <span style="color:var(--text)">POST /api/orders 200 OK</span></div>
+            <div><span style="color:var(--yellow)">→</span> <span style="color:var(--yellow)">BUY LIMIT VCK</span></div>
+            <div><span style="color:var(--yellow)">→</span> <span style="color:var(--yellow)">qty=200 price=12000</span></div>
+            <div style="color:var(--yellow)">→ status: <strong>NEW</strong></div>
+            <div style="border-top:1px solid var(--border);padding-top:4px;margin-top:2px"></div>
+            <div><span style="color:var(--accent3)">IN</span> <span style="color:var(--muted)">[REST]</span> <span style="color:var(--text)">POST /api/orders 200 OK</span></div>
+            <div><span style="color:var(--accent3)">→</span> <span style="color:var(--accent3)">SELL LIMIT VCK</span></div>
+            <div><span style="color:var(--accent3)">→</span> <span style="color:var(--accent3)">qty=200 price=12000</span></div>
+            <div style="color:var(--accent2)">→ status: <strong>FILLED ✓</strong></div>
+          </div>
+        </div>
+
+        <!-- Post-match broadcast -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 13px">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:7px">📡 Broadcast sau khớp</div>
+          <div style="display:flex;flex-direction:column;gap:5px;font-size:11px">
+            <div style="display:flex;align-items:center;gap:7px">
+              <span style="color:var(--accent);font-size:13px">→</span>
+              <span><code style="font-size:10px">ws://localhost:8765</code></span>
+            </div>
+            <div style="padding-left:20px;color:var(--muted);font-size:10px;display:flex;flex-direction:column;gap:2px">
+              <span>book_update VCK (sổ trống)</span>
+              <span>trade: VCK 12,000 × 200</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:7px;margin-top:2px">
+              <span style="color:var(--accent4);font-size:13px">→</span>
+              <span><code style="font-size:10px">ws://localhost:8000/ws/admin</code></span>
+            </div>
+            <div style="padding-left:20px;color:var(--muted);font-size:10px;display:flex;flex-direction:column;gap:2px">
+              <span>log entry FILLED</span>
+              <span>Trade History +1 row</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trade History row -->
+        <div style="background:rgba(63,185,80,0.07);border:1px solid rgba(63,185,80,0.3);border-radius:10px;padding:11px 13px">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent2);margin-bottom:7px">📊 Trade History</div>
+          <div style="display:grid;grid-template-columns:auto 1fr auto auto;gap:5px 8px;font-size:10px;align-items:center">
+            <div style="color:var(--muted)">Time</div>
+            <div style="color:var(--muted)">Symbol</div>
+            <div style="color:var(--muted)">Price</div>
+            <div style="color:var(--muted)">Qty</div>
+            <div style="color:var(--text)">16:30:01</div>
+            <div style="font-weight:700;color:var(--accent4)">VCK</div>
+            <div style="font-weight:700;color:var(--accent2)">12,000</div>
+            <div style="font-weight:700;color:var(--text)">200</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- PART 3 COVER                                        -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-idx="8">
+    <div class="part-hero">
+      <div class="part-num">03</div>
+      <div class="part-content">
+        <div class="part-label">Phần 03</div>
+        <div class="part-title"><span style="color:var(--yellow)">Demo</span><br>Sản phẩm</div>
+        <div class="part-sub">Tính năng phát triển trong 60' · End-to-end flow</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- PART 4 COVER                                        -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-idx="11">
+    <div class="part-hero">
+      <div class="part-num">04</div>
+      <div class="part-content">
+        <div class="part-label">Phần 04</div>
+        <div class="part-title"><span style="color:var(--accent3)">Bug Analysis</span><br>&amp; Fix</div>
+        <div class="part-sub">Các bugs đã identify · Cách fix · Reasoning</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SLIDE 4.1 – BUGS IDENTIFIED                         -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-idx="12" style="padding:28px 36px">
+    <div class="slide-label">Phần 04 — Bug Analysis &amp; Fix</div>
+    <div class="slide-title" style="margin-bottom:14px">Bug <span class="red">Dashboard</span> — 60 phút tìm &amp; fix</div>
+
+    <!-- STATS BAR -->
+    <div style="display:flex;gap:12px;margin-bottom:14px;align-items:stretch">
+      <div style="display:flex;gap:10px">
+        <div style="background:rgba(248,81,73,0.12);border:1px solid rgba(248,81,73,0.35);border-radius:10px;padding:10px 20px;text-align:center;min-width:90px">
+          <div style="font-size:34px;font-weight:700;color:#f85149;line-height:1">23</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:3px">Bugs tìm ra</div>
+        </div>
+        <div style="background:rgba(100,110,130,0.12);border:1px solid rgba(100,110,130,0.35);border-radius:10px;padding:10px 20px;text-align:center;min-width:90px">
+          <div style="font-size:34px;font-weight:700;color:#8b949e;line-height:1">0</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:3px">Đã fix</div>
+        </div>
+        <div style="background:rgba(210,153,34,0.12);border:1px solid rgba(210,153,34,0.35);border-radius:10px;padding:10px 20px;text-align:center;min-width:90px">
+          <div style="font-size:34px;font-weight:700;color:#d2a634;line-height:1">23</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:3px">Pending</div>
+        </div>
+      </div>
+      <div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:7px;text-transform:uppercase;letter-spacing:.06em">By Component</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span style="background:rgba(210,168,255,0.15);border:1px solid rgba(210,168,255,0.3);border-radius:6px;padding:4px 12px;font-size:14px;color:#d2a8ff">Admin Panel <strong>18</strong></span>
+          <span style="background:rgba(88,166,255,0.15);border:1px solid rgba(88,166,255,0.3);border-radius:6px;padding:4px 12px;font-size:14px;color:#58a6ff">Engine / E2E <strong>5</strong></span>
+        </div>
+      </div>
+      <div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:7px;text-transform:uppercase;letter-spacing:.06em">By Severity</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span style="background:rgba(248,81,73,0.2);border:1px solid rgba(248,81,73,0.4);border-radius:6px;padding:4px 12px;font-size:14px;color:#ff4444;font-weight:700">P0 Blocker <strong>1</strong></span>
+          <span style="background:rgba(248,81,73,0.12);border:1px solid rgba(248,81,73,0.3);border-radius:6px;padding:4px 12px;font-size:14px;color:#f85149">P1 Critical <strong>6</strong></span>
+          <span style="background:rgba(210,153,34,0.15);border:1px solid rgba(210,153,34,0.3);border-radius:6px;padding:4px 12px;font-size:14px;color:#d2a634">P2 High <strong>11</strong></span>
+          <span style="background:rgba(100,110,130,0.15);border:1px solid rgba(100,110,130,0.3);border-radius:6px;padding:4px 12px;font-size:14px;color:#8b949e">Med/Low <strong>5</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUG LIST — top 6 representative bugs -->
+    <div style="display:flex;flex-direction:column;gap:7px;flex:1">
+
+      <!-- ECH-ADMIN-001 -->
+      <div style="display:grid;grid-template-columns:1fr 500px;gap:8px">
+        <div style="background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.35);border-radius:8px;padding:9px 14px">
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;flex-wrap:wrap">
+            <span style="font-weight:700;color:#ff4444;font-size:14px">ECH-ADMIN-001</span>
+            <span style="background:rgba(255,68,68,0.2);border:1px solid rgba(255,68,68,0.4);border-radius:4px;padding:2px 8px;font-size:12px;color:#ff4444;font-weight:700">P0 BLOCKER</span>
+            <span style="background:rgba(210,168,255,0.15);border:1px solid rgba(210,168,255,0.3);border-radius:4px;padding:2px 8px;font-size:12px;color:#d2a8ff">Admin</span>
+            <span style="font-size:12px;color:var(--muted)">StockConfig.jsx</span>
+          </div>
+          <div style="font-size:14px;color:var(--text)">Form không validate <code>price_step &gt; 0</code> — lưu step=0 → engine <code>ZeroDivisionError</code> khi validate mọi lệnh tiếp theo.</div>
+        </div>
+        <div style="background:rgba(210,153,34,0.08);border:1px solid rgba(210,153,34,0.2);border-radius:8px;padding:9px 12px">
+          <div style="font-size:12px;color:#d2a634;margin-bottom:4px;font-weight:600">⏳ PLAN</div>
+          <div class="mono" style="font-size:13px;line-height:1.5">if form.price_step &lt;= 0:<br>&nbsp;&nbsp;setError("step must be &gt; 0")<br>&nbsp;&nbsp;return<br>await fetch(PUT ...)</div>
+          <div style="font-size:16px;color:var(--muted);margin-top:4px">Frontend validate trước khi gửi, không để backend crash</div>
+        </div>
+      </div>
+
+      <!-- ECH-ADMIN-002 -->
+      <div style="display:grid;grid-template-columns:1fr 500px;gap:8px">
+        <div style="background:rgba(248,81,73,0.06);border:1px solid rgba(248,81,73,0.25);border-radius:8px;padding:9px 14px">
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;flex-wrap:wrap">
+            <span style="font-weight:700;color:#f85149;font-size:14px">ECH-ADMIN-002/003</span>
+            <span style="background:rgba(248,81,73,0.15);border:1px solid rgba(248,81,73,0.3);border-radius:4px;padding:2px 8px;font-size:12px;color:#f85149;font-weight:700">P1 CRITICAL</span>
+            <span style="background:rgba(210,168,255,0.15);border:1px solid rgba(210,168,255,0.3);border-radius:4px;padding:2px 8px;font-size:12px;color:#d2a8ff">Admin</span>
+            <span style="font-size:12px;color:var(--muted)">App.jsx</span>
+          </div>
+          <div style="font-size:14px;color:var(--text)">WS <code>/ws/admin</code> + <code>/ws/market-data</code> không có reconnect — engine restart → UI đóng băng, hiển thị stale data vĩnh viễn.</div>
+        </div>
+        <div style="background:rgba(210,153,34,0.08);border:1px solid rgba(210,153,34,0.2);border-radius:8px;padding:9px 12px">
+          <div style="font-size:12px;color:#d2a634;margin-bottom:4px;font-weight:600">⏳ PLAN</div>
+          <div class="mono" style="font-size:13px;line-height:1.5">function connect() {<br>&nbsp;&nbsp;ws.onclose = () =&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;setTimeout(connect, backoff)<br>}</div>
+          <div style="font-size:16px;color:var(--muted);margin-top:4px">Reconnect với exponential backoff 1s→30s</div>
+        </div>
+      </div>
+
+      <!-- E2E-01 -->
+      <div style="display:grid;grid-template-columns:1fr 500px;gap:8px">
+        <div style="background:rgba(248,81,73,0.06);border:1px solid rgba(248,81,73,0.25);border-radius:8px;padding:9px 14px">
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;flex-wrap:wrap">
+            <span style="font-weight:700;color:#f85149;font-size:14px">E2E-01</span>
+            <span style="background:rgba(248,81,73,0.15);border:1px solid rgba(248,81,73,0.3);border-radius:4px;padding:2px 8px;font-size:12px;color:#f85149;font-weight:700">HIGH</span>
+            <span style="background:rgba(88,166,255,0.15);border:1px solid rgba(88,166,255,0.3);border-radius:4px;padding:2px 8px;font-size:12px;color:#58a6ff">Engine</span>
+            <span style="font-size:12px;color:var(--muted)">rest.py</span>
+          </div>
+          <div style="font-size:14px;color:var(--text)"><code>market_status</code> chỉ broadcast tới <code>/ws/admin</code>, không tới <code>/ws/market-data</code> — Client terminal không biết market OPEN/CLOSED.</div>
+        </div>
+        <div style="background:rgba(210,153,34,0.08);border:1px solid rgba(210,153,34,0.2);border-radius:8px;padding:9px 12px">
+          <div style="font-size:12px;color:#d2a634;margin-bottom:4px;font-weight:600">⏳ PLAN</div>
+          <div class="mono" style="font-size:13px;line-height:1.5">await broadcast_admin({<br>&nbsp;&nbsp;"type":"market_status"...})<br><span style="color:#f85149">+await broadcast_market_data({<br>&nbsp;&nbsp;"type":"market_status"...})</span></div>
+          <div style="font-size:16px;color:var(--muted);margin-top:4px">Cả 2 channel phải nhận status change</div>
+        </div>
+      </div>
+
+      <!-- E2E-02 -->
+      <div style="display:grid;grid-template-columns:1fr 500px;gap:8px">
+        <div style="background:rgba(248,81,73,0.06);border:1px solid rgba(248,81,73,0.25);border-radius:8px;padding:9px 14px">
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;flex-wrap:wrap">
+            <span style="font-weight:700;color:#f85149;font-size:14px">E2E-02</span>
+            <span style="background:rgba(248,81,73,0.15);border:1px solid rgba(248,81,73,0.3);border-radius:4px;padding:2px 8px;font-size:12px;color:#f85149;font-weight:700">HIGH</span>
+            <span style="background:rgba(88,166,255,0.15);border:1px solid rgba(88,166,255,0.3);border-radius:4px;padding:2px 8px;font-size:12px;color:#58a6ff">Engine</span>
+            <span style="font-size:12px;color:var(--muted)">ws.py</span>
+          </div>
+          <div style="font-size:14px;color:var(--text)">WS snapshot thiếu trường <code>trades</code> — Client load trang mới hiển thị Trade Feed rỗng dù đã có trade history.</div>
+        </div>
+        <div style="background:rgba(210,153,34,0.08);border:1px solid rgba(210,153,34,0.2);border-radius:8px;padding:9px 12px">
+          <div style="font-size:12px;color:#d2a634;margin-bottom:4px;font-weight:600">⏳ PLAN</div>
+          <div class="mono" style="font-size:13px;line-height:1.5">{"type":"snapshot",<br>&nbsp;"books": ...,<br><span style="color:#f85149"> "trades": [t.to_dict()<br>&nbsp;&nbsp;for t in state.trades]}</span></div>
+          <div style="font-size:16px;color:var(--muted);margin-top:4px">Include trade history trong initial snapshot</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SLIDE – CLOSING                                     -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide title-slide" data-idx="14">
+    <div class="logo">🤝</div>
+    <div class="main-title" style="font-size:82px">THANK YOU!</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:700px;margin:24px auto 0;text-align:left">
+    </div>
+  </div>
+
+</div><!-- /deck -->
+
+<!-- ── NAVIGATION ── -->
+<div id="nav">
+  <button id="btn-prev">← Prev</button>
+  <span id="counter">1 / 15</span>
+  <button id="btn-next">Next →</button>
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  let current = 0;
+
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+
+  function goto(idx) {
+    if (idx < 0 || idx >= total) return;
+    slides[current].classList.remove('active');
+    current = idx;
+    slides[current].classList.add('active');
+    counter.textContent = `${current + 1} / ${total}`;
+    progress.style.width = `${((current + 1) / total) * 100}%`;
+    btnPrev.disabled = current === 0;
+    btnNext.disabled = current === total - 1;
+  }
+
+  btnPrev.addEventListener('click', () => goto(current - 1));
+  btnNext.addEventListener('click', () => goto(current + 1));
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') goto(current + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')                      goto(current - 1);
+    if (e.key === 'Home') goto(0);
+    if (e.key === 'End')  goto(total - 1);
+  });
+
+  // Touch swipe (slide navigation)
+  let touchX = 0;
+  document.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 50) goto(dx < 0 ? current + 1 : current - 1);
+  });
+
+  goto(0);
+
+  // ── DRAGGABLE IMAGE SLIDER ENGINE ──────────────────────
+  const _sliders = {};
+
+  function initSlider(id) {
+    const wrap    = document.getElementById(id);
+    const track   = document.getElementById(id + '-track');
+    const dotsEl  = document.getElementById(id + '-dots');
+    const badge   = document.getElementById(id + '-badge');
+    const btnPrev = document.getElementById(id + '-prev');
+    const btnNext = document.getElementById(id + '-next');
+    if (!wrap || !track) return;
+
+    const items = track.querySelectorAll('.img-slide-item');
+    const N = items.length;
+    const st = { idx: 0, dragging: false, startX: 0 };
+    _sliders[id] = st;
+
+    // build dots
+    for (let i = 0; i < N; i++) {
+      const d = document.createElement('button');
+      d.className = 'slider-dot' + (i === 0 ? ' active' : '');
+      d.addEventListener('click', (e) => { e.stopPropagation(); _sliderGoto(id, i); });
+      dotsEl.appendChild(d);
+    }
+
+    function render(animate) {
+      if (!animate) track.classList.add('no-tr');
+      else          track.classList.remove('no-tr');
+      track.style.transform = `translateX(-${st.idx * 100}%)`;
+      if (badge)   badge.textContent = `${st.idx + 1} / ${N}`;
+      if (btnPrev) btnPrev.disabled = st.idx === 0;
+      if (btnNext) btnNext.disabled = st.idx === N - 1;
+      dotsEl.querySelectorAll('.slider-dot').forEach((d, i) =>
+        d.classList.toggle('active', i === st.idx));
+    }
+    st.render = render;
+
+    // ── mouse drag ──
+    wrap.addEventListener('mousedown', e => {
+      // prevent slide keyboard nav from stealing focus
+      e.stopPropagation();
+      st.dragging = true;
+      st.startX = e.clientX;
+      wrap.classList.add('dragging');
+      track.classList.add('no-tr');
+    });
+
+    document.addEventListener('mousemove', e => {
+      if (!st.dragging) return;
+      const dx = e.clientX - st.startX;
+      const base = -st.idx * wrap.offsetWidth;
+      track.style.transform = `translateX(${base + dx}px)`;
+    });
+
+    document.addEventListener('mouseup', e => {
+      if (!st.dragging) return;
+      st.dragging = false;
+      wrap.classList.remove('dragging');
+      const dx = e.clientX - st.startX;
+      if      (dx < -50 && st.idx < N - 1) st.idx++;
+      else if (dx >  50 && st.idx > 0)     st.idx--;
+      render(true);
+    });
+
+    // ── touch drag ──
+    wrap.addEventListener('touchstart', e => {
+      st.startX = e.touches[0].clientX;
+      track.classList.add('no-tr');
+    }, { passive: true });
+
+    wrap.addEventListener('touchmove', e => {
+      const dx = e.touches[0].clientX - st.startX;
+      const base = -st.idx * wrap.offsetWidth;
+      track.style.transform = `translateX(${base + dx}px)`;
+    }, { passive: true });
+
+    wrap.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - st.startX;
+      if      (dx < -50 && st.idx < N - 1) st.idx++;
+      else if (dx >  50 && st.idx > 0)     st.idx--;
+      render(true);
+    });
+
+    // ── arrow buttons ──
+    if (btnPrev) btnPrev.addEventListener('click', e => { e.stopPropagation(); _sliderGoto(id, st.idx - 1); });
+    if (btnNext) btnNext.addEventListener('click', e => { e.stopPropagation(); _sliderGoto(id, st.idx + 1); });
+
+    render(false);
+  }
+
+  function _sliderGoto(id, idx) {
+    const st = _sliders[id];
+    if (!st) return;
+    const track = document.getElementById(id + '-track');
+    const items = track ? track.querySelectorAll('.img-slide-item') : [];
+    st.idx = Math.max(0, Math.min(items.length - 1, idx));
+    st.render(true);
+  }
+
+  // init sliders that exist in DOM
+  initSlider('img-slider-s4');
+</script>
+
+</body>
+</html>
