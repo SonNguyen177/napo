@@ -269,7 +269,27 @@ td {
 .price-range {
   font-size: 11px;
   color: var(--text-dim);
+  margin-bottom: 4px;
+}
+
+.high-low {
+  display: flex;
+  gap: 10px;
+  font-size: 11px;
   margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.hl-high {
+  color: #c400c4;
+}
+
+.hl-low {
+  color: #00b0ff;
+}
+
+.hl-last {
+  color: #ffab00;
 }
 
 .book-table {
