@@ -1,0 +1,347 @@
+/* === Global === */
+:root {
+  --bg: #0f0f1a;
+  --surface: #1a1a2e;
+  --surface2: #222240;
+  --border: #333355;
+  --text: #e0e0e0;
+  --text-dim: #888;
+  --buy: #26a69a;
+  --sell: #ef5350;
+  --accent: #7c4dff;
+  --success: #4caf50;
+  --danger: #f44336;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  font-size: 13px;
+}
+
+/* === App Layout === */
+.app {
+  min-height: 100vh;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.app-header h1 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.status {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status.connected {
+  background: rgba(76, 175, 80, 0.2);
+  color: var(--success);
+}
+
+.status.disconnected {
+  background: rgba(244, 67, 54, 0.2);
+  color: var(--danger);
+}
+
+.app-layout {
+  display: flex;
+  height: calc(100vh - 50px);
+}
+
+.left-panel {
+  width: 380px;
+  min-width: 380px;
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+  padding: 16px;
+  background: var(--surface);
+}
+
+.right-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+/* === Headings === */
+h2 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+h3 {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* === Form === */
+.order-form {
+  margin-bottom: 16px;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.form-row label {
+  width: 90px;
+  font-size: 12px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+
+.form-row input,
+.form-row select {
+  flex: 1;
+  padding: 6px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.form-row input:focus,
+.form-row select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* === Buttons === */
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  width: 100%;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-success {
+  background: var(--success);
+  color: white;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: white;
+}
+
+/* === Auto Generator === */
+.auto-gen {
+  padding: 12px;
+  background: var(--surface2);
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+/* === Tables === */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+th {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+td {
+  padding: 5px 8px;
+  border-bottom: 1px solid rgba(51, 51, 85, 0.5);
+}
+
+.buy {
+  color: var(--buy);
+}
+
+.sell {
+  color: var(--sell);
+}
+
+.price {
+  font-weight: 500;
+}
+
+.empty {
+  text-align: center;
+  color: var(--text-dim);
+  padding: 20px;
+}
+
+/* === Exec Reports === */
+.exec-reports {
+  margin-top: 16px;
+}
+
+.er-new td:first-child {
+  border-left: 3px solid var(--accent);
+}
+
+.er-trade td:first-child {
+  border-left: 3px solid var(--success);
+}
+
+.er-rejected td:first-child {
+  border-left: 3px solid var(--danger);
+}
+
+.er-cancelled td:first-child {
+  border-left: 3px solid var(--text-dim);
+}
+
+/* === Market Data === */
+.market-data {
+  margin-bottom: 20px;
+}
+
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.order-book-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.book-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.market-state {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.market-state.open {
+  background: rgba(76, 175, 80, 0.2);
+  color: var(--success);
+}
+
+.market-state.closed {
+  background: rgba(244, 67, 54, 0.2);
+  color: var(--danger);
+}
+
+.price-range {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.book-table {
+  font-size: 12px;
+}
+
+.book-table .sub-header th {
+  font-size: 11px;
+  text-align: center;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+}
+
+.book-table td.qty {
+  text-align: right;
+  color: var(--text-dim);
+}
+
+.book-table td.price.buy {
+  text-align: right;
+  font-weight: 600;
+}
+
+.book-table td.price.sell {
+  text-align: left;
+  font-weight: 600;
+}
+
+/* === Trade View === */
+.trade-view {
+  margin-bottom: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+}
+
+/* === Price Chart === */
+.price-chart {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.chart-header select {
+  padding: 4px 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+}
+
+/* === Scrollbar === */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}

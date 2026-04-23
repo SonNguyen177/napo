@@ -1,0 +1,381 @@
+/* === Global === */
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #1c2333;
+  --border: #30363d;
+  --text: #c9d1d9;
+  --text-dim: #8b949e;
+  --buy: #26a69a;
+  --sell: #ef5350;
+  --accent: #58a6ff;
+  --success: #3fb950;
+  --danger: #f85149;
+  --warning: #d29922;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 13px;
+}
+
+/* === Layout === */
+.admin-app {
+  min-height: 100vh;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-header h1 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.status {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status.connected {
+  background: rgba(63, 185, 80, 0.15);
+  color: var(--success);
+}
+
+.status.disconnected {
+  background: rgba(248, 81, 73, 0.15);
+  color: var(--danger);
+}
+
+.admin-layout {
+  padding: 20px 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.top-row {
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.bottom-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* === Cards === */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.card h2 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.card-header h2 {
+  margin-bottom: 0;
+}
+
+.card-header select {
+  padding: 4px 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-size: 12px;
+}
+
+/* === Market Control === */
+.control-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.state-badge {
+  font-size: 16px;
+  font-weight: 700;
+  padding: 6px 20px;
+  border-radius: 6px;
+}
+
+.state-badge.open {
+  background: rgba(63, 185, 80, 0.15);
+  color: var(--success);
+}
+
+.state-badge.closed {
+  background: rgba(248, 81, 73, 0.15);
+  color: var(--danger);
+}
+
+.control-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+/* === Client Count === */
+.count-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.count-number {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.count-label {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* === Buttons === */
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-success {
+  background: var(--success);
+  color: white;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: white;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+}
+
+.btn-sm.btn-success {
+  background: var(--success);
+}
+
+.btn-sm.btn-primary {
+  background: var(--accent);
+}
+
+.btn-sm.btn-muted {
+  background: var(--border);
+  color: var(--text-dim);
+}
+
+.edit-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.error-text {
+  color: var(--danger);
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+/* === Tables === */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+th {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  font-weight: 500;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+td {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+}
+
+td.symbol {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.buy {
+  color: var(--buy);
+}
+
+.sell {
+  color: var(--sell);
+}
+
+.price {
+  font-weight: 600;
+}
+
+.qty {
+  text-align: right;
+  color: var(--text-dim);
+}
+
+.empty {
+  text-align: center;
+  color: var(--text-dim);
+  padding: 20px;
+}
+
+/* === Stock Config === */
+.stock-config input {
+  width: 80px;
+  padding: 4px 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text);
+  font-size: 12px;
+}
+
+.stock-config input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* === Order Book View === */
+.books-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.book-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.book-card h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--accent);
+}
+
+.book-table td.price.buy {
+  text-align: right;
+}
+
+.book-table td.price.sell {
+  text-align: left;
+}
+
+/* === Table Scroll === */
+.table-scroll {
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+/* === Comm Logs === */
+.log-row.in {
+  border-left: 3px solid var(--buy);
+}
+
+.log-row.out {
+  border-left: 3px solid var(--sell);
+}
+
+.dir-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.dir-badge.in {
+  background: rgba(38, 166, 154, 0.2);
+  color: var(--buy);
+}
+
+.dir-badge.out {
+  background: rgba(239, 83, 80, 0.2);
+  color: var(--sell);
+}
+
+.fix-row td {
+  background: var(--bg);
+  padding: 8px;
+}
+
+.fix-raw {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 11px;
+  color: var(--warning);
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+
+/* === Scrollbar === */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
