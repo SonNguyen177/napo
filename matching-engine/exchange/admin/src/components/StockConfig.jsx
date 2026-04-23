@@ -41,17 +41,6 @@ function StockRow({ symbol, config, onSave }) {
   };
 
   const handleSave = async () => {
-<<<<<<< HEAD
-    const validationErr = validateForm();
-    if (validationErr) {
-      setError(validationErr);
-=======
-    const validationError = validateStockConfig(form);
-    if (validationError) {
-      setError(validationError);
->>>>>>> master
-      return;
-    }
     try {
       await onSave(symbol, form);
       setEditing(false);
