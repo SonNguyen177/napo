@@ -9,7 +9,8 @@ Source tag: `ECH`
 ## ECH-CLIENT-001
 
 - **ID**: ECH-CLIENT-001
-- **Fixed**: [ ]
+- **Fixed**: [x]
+- **Fix-summary**: Extract guard logic sang `src/lib/validateOrderForm.js`; thay falsy-check `!form.quantity` bằng `parseInt` + `Number.isFinite(qty) && qty > 0`. Chuỗi `"0"` giờ bị reject tại client trước khi gửi server. Unit test `test/unit/validateOrderForm.test.mjs` cover 6 case (qty="0", empty account, empty qty, empty price LIMIT, MARKET empty price ok, happy path).
 - **Severity**: P0 Blocker
 - **Module**: `client / OrderEntry`
 - **Location**: `matching-engine/client/src/components/OrderEntry.jsx:26-41`
