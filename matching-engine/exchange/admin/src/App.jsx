@@ -56,7 +56,7 @@ function App() {
 
         <StockConfig stocks={state?.stocks} onSave={handleSaveStock} />
 
-        <OrderBookView books={state?.books} />
+        <OrderBookView books={state?.books} stocks={state?.stocks} />
 
         <div className="bottom-row">
           <TradeHistory trades={state?.trades} />
