@@ -161,7 +161,7 @@ class OrderBook:
 
             queue = opposite[best_price]
             while incoming.leaves_qty > 0 and queue:
-                resting = queue[-1]
+                resting = queue[0]
                 fill_qty = min(incoming.leaves_qty, resting.leaves_qty)
                 fill_price = incoming.price if incoming.price else best_price
 
@@ -194,9 +194,9 @@ class OrderBook:
                     last_px=fill_price, last_qty=fill_qty,
                 ))
 
-                # Remove fully filled resting order
+                # Remove fully filled resting order (FIFO: pop from the left)
                 if resting.leaves_qty == 0:
-                    queue.pop()
+                    queue.popleft()
 
             # Clean up empty price level
             if not queue:
