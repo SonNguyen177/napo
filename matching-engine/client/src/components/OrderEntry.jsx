@@ -121,6 +121,8 @@ export default function OrderEntry({ sendOrder, execReports, snapshots }) {
             <input
               name="price"
               type="number"
+              min="1"
+              step="1"
               value={form.price}
               onChange={handleChange}
               placeholder="e.g. 55000"

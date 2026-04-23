@@ -69,7 +69,8 @@ Source tag: `ECH`
 ## ECH-CLIENT-003
 
 - **ID**: ECH-CLIENT-003
-- **Fixed**: [ ]
+- **Fixed**: [x]
+- **Fix-summary**: Mở rộng `validateOrderForm.js` — khi `ord_type === "LIMIT"` thì `parseInt(form.price, 10)` và reject nếu `!Number.isFinite(price) || price <= 0`. Thêm defense-in-depth `min="1"` + `step="1"` cho `<input name="price">` trong `OrderEntry.jsx`. Unit test `test/unit/validateOrderPrice.test.mjs` cover 6 case (LIMIT price="-1"/"0"/"abc" reject, MARKET price="-1" allow, price input có `min="1"`, `step="1"`) — 3 test fail trước fix, pass sau fix.
 - **Severity**: P0 Blocker
 - **Module**: `client / OrderEntry`
 - **Location**: `matching-engine/client/src/components/OrderEntry.jsx:29,38`
