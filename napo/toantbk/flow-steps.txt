@@ -1,10 +1,3 @@
-Chuẩn bị:
-- Cài đặt môi trường
-- Chuẩn bị repo, branch mỗi người
-- Chuẩn bị file .gitignore@napo\toantbk
-- Tạo folder worktree
-- Tạo file run-claude.bat
-
 1. Nap context *3*
 /bmad-generate-project-context theo huong dan @napo\toantbk\step1-generate-project-context.md
 
@@ -26,3 +19,10 @@ Chuẩn bị:
 
 6. Merge code fix
 /bmad-quick-dev merge code theo huong dan @napo\toantbk\step5-merge-code-fix-bug.md cho bug id ... 
+
+
+
+================
+optional:
+/bmad-quick-dev chạy lại các unit test đã có để verify các bug đã fix trong @planning-artifacts
+/bmad-review-adversarial-general cho các modules..
