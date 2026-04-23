@@ -94,7 +94,8 @@ Source tag: `ECH`
 ## ECH-CLIENT-004
 
 - **ID**: ECH-CLIENT-004
-- **Fixed**: [ ]
+- **Fixed**: [x]
+- **Fix-summary**: Extract auto-gen logic sang `src/lib/generateAutoOrder.js`; helper trả về `null` khi `snap` thiếu, `price_step`/`qty_step <= 0`, hoặc `ceiling <= floor` — chặn mọi payload có thể kích `os._exit(1)` ở engine. `OrderEntry.jsx::generateRandomOrder` giờ chỉ gọi helper và chỉ tăng `orderCounter` khi nhận order hợp lệ. Unit test `test/unit/generateAutoOrder.test.mjs` cover 6 case (qty_step=0 / price_step=0 / ceiling<=floor / snap undefined / happy path / JSX import guard).
 - **Severity**: P0 Blocker
 - **Module**: `client / OrderEntry (auto-gen)`
 - **Location**: `matching-engine/client/src/components/OrderEntry.jsx:43-68`

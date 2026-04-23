@@ -118,7 +118,8 @@
 ---
 
 ## ECH-ENGINE-005
-- [ ] Fixed
+- [x] Fixed
+- **Fix-summary:** Mở rộng tuple `except` trong `ws_server._handle_new_order` thành `(KeyError, ValueError, TypeError, AttributeError)` — giờ payload có price/quantity là list/dict (→ `int(...)` raise `TypeError`) hoặc side/symbol không phải string (→ `.upper()` raise `AttributeError`) sẽ được convert thành `{"type":"error","message":"Invalid order: ..."}` thay vì bubble ra `_handle_client` và đóng kết nối. Thêm regression test `tests/unit/test_ech_engine_005_bad_payload_types.py` (3 case: price=list, quantity=dict, side=int) — fail trước fix (TypeError/AttributeError escape), pass sau fix. Không đụng tới other envelope/validation logic; các test ECH-ENGINE-001..004 vẫn xanh.
 - **Severity:** P1 Critical
 - **Module / Location:** `matching-engine/exchange/engine/src/engine/ws_server.py:124-147`
 - **Description:** `_handle_new_order` chỉ catch `KeyError, ValueError`. Nếu client gửi price/quantity là mảng hoặc object (JSON list/dict), `int()` ném `TypeError` không được catch → exception bubble ra `_handle_client`, đóng kết nối client ngay lập tức.

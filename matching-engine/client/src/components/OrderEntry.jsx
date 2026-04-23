@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { validateOrderForm } from "../lib/validateOrderForm";
+import { generateAutoOrder } from "../lib/generateAutoOrder";
 
 const SYMBOLS = ["ACB", "FPT", "VCK"];
 const SIDES = ["BUY", "SELL"];
@@ -42,29 +43,15 @@ export default function OrderEntry({ sendOrder, execReports, snapshots }) {
 
   const generateRandomOrder = useCallback(() => {
     const symbol = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-    const side = Math.random() > 0.5 ? "BUY" : "SELL";
     const snap = snapshots[symbol];
-    if (!snap) return;
-
-    const floor = snap.floor;
-    const ceiling = snap.ceiling;
-    const step = snap.price_step;
-    const steps = Math.floor((ceiling - floor) / step);
-    const price = floor + Math.floor(Math.random() * (steps + 1)) * step;
-
-    const qtySteps = Math.floor(Math.random() * 5) + 1;
-    const quantity = qtySteps * snap.qty_step;
-
-    orderCounter.current += 1;
-    sendOrder({
-      cl_ord_id: `AUTO-${Date.now()}-${orderCounter.current}`,
-      account: "AUTO",
+    const order = generateAutoOrder({
       symbol,
-      side,
-      ord_type: "LIMIT",
-      price,
-      quantity,
+      snap,
+      counter: orderCounter.current + 1,
     });
+    if (!order) return;
+    orderCounter.current += 1;
+    sendOrder(order);
   }, [sendOrder, snapshots]);
 
   useEffect(() => {
