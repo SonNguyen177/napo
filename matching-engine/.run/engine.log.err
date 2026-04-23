@@ -1,0 +1,21 @@
+Using CPython 3.14.4 interpreter at: C:\Users\toantbk\AppData\Local\Programs\Python\Python314\python.exe
+Creating virtual environment at: .venv
+   Building engine @ file:///D:/Toantbk/Projects/Hackathon/napo/matching-engine/exchange/engine
+warning: `build_system.requires = ["uv-build>=0.9.15,<0.10.0"]` does not contain the current uv version 0.11.7
+      Built engine @ file:///D:/Toantbk/Projects/Hackathon/napo/matching-engine/exchange/engine
+Downloading pygments (1.2MiB)
+Downloading pydantic-core (2.0MiB)
+ Downloaded pygments
+ Downloaded pydantic-core
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 26 packages in 1.36s
+INFO:     Started server process [21512]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:9970 - "WebSocket /ws/admin" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:49096 - "WebSocket /ws/admin" [accepted]
+INFO:     connection open

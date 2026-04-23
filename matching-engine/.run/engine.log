@@ -1,0 +1,8 @@
+Starting exchange engine...
+  Admin API:        http://0.0.0.0:8000
+  Client WebSocket: ws://0.0.0.0:8765
+  Admin WebSocket:  ws://0.0.0.0:8000/ws/admin
+INFO:     127.0.0.1:59982 - "GET / HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:59982 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:14783 - "OPTIONS /api/market/start HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14783 - "POST /api/market/start HTTP/1.1" 200 OK
