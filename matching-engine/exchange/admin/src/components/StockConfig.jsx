@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { validateStockConfig } from "../lib/validateStockConfig.js";
 
 const FIELDS = [
   { key: "floor", label: "Floor" },
@@ -24,6 +25,11 @@ function StockRow({ symbol, config, onSave }) {
   };
 
   const handleSave = async () => {
+    const validationError = validateStockConfig(form);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
     try {
       await onSave(symbol, form);
       setEditing(false);

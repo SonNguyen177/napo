@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { validateOrderForm } from "../lib/validateOrderForm";
 
 const SYMBOLS = ["ACB", "FPT", "VCK"];
 const SIDES = ["BUY", "SELL"];
@@ -25,8 +26,7 @@ export default function OrderEntry({ sendOrder, execReports, snapshots }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!form.account || !form.quantity) return;
-    if (form.ord_type === "LIMIT" && !form.price) return;
+    if (!validateOrderForm(form)) return;
 
     orderCounter.current += 1;
     sendOrder({
@@ -121,6 +121,8 @@ export default function OrderEntry({ sendOrder, execReports, snapshots }) {
             <input
               name="price"
               type="number"
+              min="1"
+              step="1"
               value={form.price}
               onChange={handleChange}
               placeholder="e.g. 55000"
@@ -132,6 +134,8 @@ export default function OrderEntry({ sendOrder, execReports, snapshots }) {
           <input
             name="quantity"
             type="number"
+            min="1"
+            step="1"
             value={form.quantity}
             onChange={handleChange}
             placeholder="e.g. 100"
