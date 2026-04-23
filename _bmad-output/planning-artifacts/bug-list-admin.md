@@ -79,10 +79,11 @@ onClick={() => setExpanded(expanded === i ? null : i)}
 
 ## ECH-ADMIN-003
 
-- [ ] Fixed
+- [x] Fixed
 - **Severity**: P1 Critical
 - **Module**: `admin/CommLogs`
 - **Location**: `matching-engine/exchange/admin/src/components/CommLogs.jsx:38-64`
+- **Fix-summary**: Imported `Fragment` from `react` and replaced the `<>...</>` shorthand inside `display.map` with `<Fragment key={`${key}-${i}`}>…</Fragment>`, dropping the now-redundant `key` props on the inner `<tr>`s. List reconciliation now has a stable, unique key at the top-level item, so prepended logs per 0.5s tick no longer reuse wrong DOM rows and React stops emitting the "unique key prop" warning. Coverage: `matching-engine/exchange/admin/test/unit/commLogsFragmentKey.test.js` (3 source-level assertions) via `node --test`.
 - **Description**: Ở `display.map((log, i) => (<>...</>))` dùng Fragment shorthand `<>...</>` bọc 2 `<tr>` nhưng không (và không thể) gán `key` trên shorthand fragment. Key duy nhất là trên `<tr>` con (`key={i}`, `key={\`${i}-fix\`}`). Khi số lượng row ở cấp map thay đổi giữa các render (ví dụ expanded chuyển từ i=3 sang i=5 → render thêm fix row ở i=5, bỏ ở i=3), React reconciler không có key ổn định ở cấp fragment → DOM mount/unmount không đều, state con (nếu sau này thêm input) bị reset, và console spam warning.
 - **Root cause**: Fragment shorthand không nhận prop `key`; phải dùng `<React.Fragment key={...}>`.
 - **Impact**: React dev warning mỗi render. Nặng hơn: khi logs prepend mỗi tick, reconciliation reuse DOM sai hàng → flash visual, scroll jitter ở `table-scroll`.
