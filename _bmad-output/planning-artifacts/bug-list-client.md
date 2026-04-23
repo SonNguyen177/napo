@@ -44,7 +44,8 @@ Source tag: `ECH`
 ## ECH-CLIENT-002
 
 - **ID**: ECH-CLIENT-002
-- **Fixed**: [ ]
+- **Fixed**: [x]
+- **Fix-summary**: Thêm `min="1"` + `step="1"` cho `<input name="quantity">` trong `OrderEntry.jsx` — browser chặn giá trị âm / thập phân ngay tại DOM, bổ sung defense-in-depth cho check `qty <= 0` ở `validateOrderForm` (đã có từ ECH-CLIENT-001). Unit test `test/unit/orderEntryInputs.test.mjs` kiểm tra (a) JSX có `min="1"`, (b) JSX có `step="1"`, (c) `validateOrderForm` reject `quantity="-100"` — 2 test DOM fail trước fix, pass sau fix.
 - **Severity**: P0 Blocker
 - **Module**: `client / OrderEntry`
 - **Location**: `matching-engine/client/src/components/OrderEntry.jsx:26-41`
