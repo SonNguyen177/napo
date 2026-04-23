@@ -37,7 +37,8 @@
 ---
 
 ## ECH-ENGINE-002
-- [ ] Fixed
+- [x] Fixed
+- **Fix-summary:** Thêm envelope validation tại WS boundary trong `ws_server._handle_new_order`: reject sớm với `{"type":"error"}` nếu `quantity <= 0` hoặc `price < 0` — không để giá trị độc hại tới `MatchingEngine.submit_order` (envelope `os._exit(1)`). Thêm regression test `tests/unit/test_ech_engine_002_invalid_qty.py` (qty=-1 và qty=0) — monkeypatch `os._exit` để verify engine không bị kill; fail trước fix, pass sau fix. 3 failure pre-existing trong `test_order_book.py` là bug `fill_price` khác, ngoài phạm vi.
 - **Severity:** P0 Blocker
 - **Module / Location:** `matching-engine/exchange/engine/src/engine/ws_server.py:124-147` (kết hợp `matching-engine/exchange/engine/src/engine/matching.py:80-94`)
 - **Description:** DoS – bất kỳ client WS nào cũng có thể giết process engine bằng cách gửi `quantity` âm hoặc bằng 0.
