@@ -90,7 +90,8 @@
 ---
 
 ## ECH-ENGINE-004
-- [ ] Fixed
+- [x] Fixed
+- **Fix-summary:** `MatchingEngine.update_stock_config` (matching.py) snapshot 4 field trước khi setattr, sau đó gọi helper `_validate_stock_invariants` (kiểm `price_step>0`, `qty_step>0`, `ceiling>floor`, `(ceiling-floor)%price_step==0`); nếu vi phạm → rollback toàn bộ field từ snapshot và raise `ValueError`. `PUT /api/stocks/{symbol}` (api.py) wrap call trong `try/except ValueError` → trả 400 với `detail`. Thêm regression test `tests/unit/test_ech_engine_004_invalid_stock_config.py` (5 case: PUT ceiling<floor, PUT floor>ceiling, post-bad-PUT submit_order không trip `os._exit`, direct call ceiling<=floor, direct call misaligned step) — tất cả fail trước fix, pass sau fix. 3 failure pre-existing trong `test_order_book.py` là bug `fill_price` khác, ngoài phạm vi.
 - **Severity:** P0 Blocker
 - **Module / Location:** `matching-engine/exchange/engine/src/engine/api.py:29-40` và `matching-engine/exchange/engine/src/engine/matching.py:115-133` (trigger ở `matching.py:88-94`)
 - **Description:** Admin DoS – `PUT /api/stocks/{symbol}` cho phép set `ceiling <= floor`; order tiếp theo đụng envelope guard và giết engine.

@@ -116,18 +116,51 @@ class MatchingEngine:
         """Update stock config fields (floor, ceiling, price_step, qty_step).
 
         Returns the updated config, or None if symbol not found.
-        Note: updating config does not affect existing orders on the book.
+        Raises ValueError (and rolls back) if the resulting config would
+        violate cross-field invariants — guards against ECH-ENGINE-004
+        where a degenerate config (e.g. ceiling<=floor) would later trip
+        the envelope guard in submit_order and call os._exit(1).
         """
         stock = self.config.get_stock(symbol)
         if stock is None:
             return None
 
+        snapshot = {
+            "floor": stock.floor,
+            "ceiling": stock.ceiling,
+            "price_step": stock.price_step,
+            "qty_step": stock.qty_step,
+        }
+
         for key in ("floor", "ceiling", "price_step", "qty_step"):
             if key in kwargs:
                 setattr(stock, key, kwargs[key])
 
-        # Update the book's config reference too
+        try:
+            _validate_stock_invariants(stock)
+        except ValueError:
+            for key, value in snapshot.items():
+                setattr(stock, key, value)
+            raise
+
         if symbol in self._books:
             self._books[symbol].config = stock
 
         return stock
+
+
+def _validate_stock_invariants(stock: StockConfig) -> None:
+    """Cross-field invariants single-field validators can't express."""
+    if stock.price_step <= 0:
+        raise ValueError(f"price_step must be positive, got {stock.price_step}")
+    if stock.qty_step <= 0:
+        raise ValueError(f"qty_step must be positive, got {stock.qty_step}")
+    if stock.ceiling <= stock.floor:
+        raise ValueError(
+            f"ceiling ({stock.ceiling}) must be greater than floor ({stock.floor})"
+        )
+    if (stock.ceiling - stock.floor) % stock.price_step != 0:
+        raise ValueError(
+            f"(ceiling - floor) must be a multiple of price_step "
+            f"(ceiling={stock.ceiling}, floor={stock.floor}, price_step={stock.price_step})"
+        )
