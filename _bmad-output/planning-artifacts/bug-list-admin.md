@@ -43,10 +43,11 @@ const handleSave = async () => {
 
 ## ECH-ADMIN-002
 
-- [ ] Fixed
+- [x] Fixed
 - **Severity**: P1 Critical
 - **Module**: `admin/CommLogs`
 - **Location**: `matching-engine/exchange/admin/src/components/CommLogs.jsx:4,11,38-64`
+- **Fix-summary**: Added pure helper `src/lib/commLogIdentity.js` with `getLogKey(log)` (stable composite of `timestamp|direction|client_id|message_type|summary`) and `findExpandedLog(display, expandedKey)`. `CommLogs.jsx` replaces index-based `expanded` with `expandedKey`, and reads `fix_raw` from the log resolved by key — so when logs shift after a 0.5s tick, the expanded row still tracks the log the user originally clicked (or collapses if that log has been evicted past the 100-row window). Coverage: `matching-engine/exchange/admin/test/unit/commLogIdentity.test.js` (6 cases, including the shift-after-prepend repro) via `node --test`.
 - **Description**: `expanded` state lưu chỉ số index trong mảng `display` (line 43 `setExpanded(expanded === i ? null : i)`). Mỗi 0.5s WS push lại full `logs`, `useAdminWebSocket` ghi đè toàn bộ state → `display = filtered.slice(-100).reverse()` có thể đổi thứ tự / chèn log mới ở đầu. Row tại index `i` giờ là log khác, nhưng `expanded === i` vẫn true → `log.fix_raw` hiển thị thuộc về log MỚI, không phải log user đã click.
 - **Root cause**: Expanded dùng index làm identity; logs không có client-stable ID (server gửi theo thứ tự time, không gắn id).
 - **Impact**: User xem raw FIX của log cũ, tick sau đột nhiên nhảy sang raw FIX của log mới hoàn toàn. Gây hiểu nhầm nghiêm trọng khi debug FIX trace, đặc biệt lúc tải cao (auto-generator client flood logs).
