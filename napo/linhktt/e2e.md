@@ -4,7 +4,7 @@ Dùng file `@brd-order.md` làm check list để thực hiện test thêm 1 số
 
 ## Yêu cầu
 
-- Các testcase cần tập trung vào **test tích hợp** 3 hệ thống: **@matching-engine/client/ @matching-engine/exchange/admin/ @matching-engine/exchange/engine**
+- Các testcase cần tập trung vào **test tích hợp** 3 hệ thống: @matching-engine/client/ @matching-engine/exchange/admin/ @matching-engine/exchange/engine
 - Cần hỏi lại trước khi fix bất kỳ bug nào.
 - Cover:
   - Happy case

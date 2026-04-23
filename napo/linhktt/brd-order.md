@@ -18,6 +18,15 @@
 ── DANH MỤC 2: LOGIC ĐẶT LỆNH ─────────────
 □ Đã đặt thành công lệnh LIMIT và MARKET trong phiên OPEN ?
 □ Đã chặn đặt lệnh khi không trong phiên OPEN?
+□ Trường Tài khoản đã validate?
+  - Không được để trống, khoảng trắng
+  - Không được nhập ký tự đặc biệt
+□ Trường Side đã validate?
+  - Không được để trống, khoảng trắng
+  - Không được nhập khác MUA hoặc BÁN
+□ Trường Type đã validate?
+  - Không được để trống, khoảng trắng
+  - Không được nhập khác LIMIT hoặc MARKET
 □ Trường Khối lượng của lệnh LIMIT và MARKET đã validate đủ các yêu cầu dưới?
   - Không được để trống, khoảng trắng
   - không được nhập <= 0
